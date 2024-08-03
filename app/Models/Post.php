@@ -13,16 +13,16 @@ class Post extends Model
     use HasFactory;
 
 
-    protected static function booted()
-    {
-        static::saved(function ($post) {
-            Redis::flushAll();
-        });
+    // protected static function booted()
+    // {
+    //     static::saved(function ($post) {
+    //         Redis::flushAll();
+    //     });
 
-        static::deleted(function ($post) {
-            Redis::flushAll();
-        });
-    }
+    //     static::deleted(function ($post) {
+    //         Redis::flushAll();
+    //     });
+    // }
 
 
     protected $fillable = [
@@ -30,10 +30,29 @@ class Post extends Model
         'description',
         'address',
         'address_detail',
-        'direction',
+        'classrank',
         'area',
+        'areausable',
         'price',
+        'priceservice',
+        'priceElectricity',
+        'pricewater',
+        'floors',
+        'rooms',
+        'bathrooms',
+        'bonus',
+        'bonusmonthly',
+        'direction',
+        'directionBalcony',
+        'wayin',
+        'font',
+        'pccc',
+        'elevator',
+        'stairs',
         'unit',
+        'unit1',
+        'unit2',
+        'unit3',
         'sold_status',
         'status_id',
         'priority_status',
@@ -77,6 +96,6 @@ class Post extends Model
 
     public function views()
     {
-        return $this->hasMany(PostView::class);
+        return $this->hasMany(PostView::class)->with('user');
     }
 }

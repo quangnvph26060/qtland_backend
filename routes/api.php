@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PostViewController;
 
@@ -65,6 +67,15 @@ Route::group(['prefix' => 'posts'], function () {
     Route::patch('/{id}', [PostController::class, 'updateStatus']);
     Route::delete('/{id}', [PostController::class, 'destroy']);
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
+});
+Route::group(['prefix' => 'client'], function(){
+    Route::get('', [ClientController::class, 'index']);
+    Route::delete('/{id}', [ClientController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'config'], function(){
+    Route::get('', [ConfigController::class, 'detail']);
+    Route::post('', [ConfigController::class, 'update']);
 });
 
 // Route for posts type

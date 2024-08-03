@@ -19,11 +19,14 @@ class PostController extends Controller
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $posts = Post::with(['user', 'status', 'postImage'])->get();
-
+        $posts = Post::with(['user', 'status', 'postImage'])->orderBy('created_at', 'DESC');
+        if($request->address){
+            $posts->where('address', $request->address);
+        }
+        $posts = $posts->get();
         return response()->json($posts);
     }
 
@@ -45,17 +48,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'title' => 'required',
-        //     'description' => 'required',
-        //     'address' => 'required',
-        //     'area' => 'required',
-        //     'price' => 'required',
-        //     'unit' => 'required',
-        //     'sold_status' => 'required',
-        //     'user_id' => 'required',
-        //     'status_id' => 'required'
-        // ]);
+
 
         $post = Post::create(
             [
@@ -63,20 +56,38 @@ class PostController extends Controller
                 'description' => $request->description,
                 'address' => $request->address,
                 'address_detail' => $request->address_detail,
+                'classrank' => $request->classrank,
                 'area' => $request->area,
+                'areausable' => $request->areausable,
                 'price' => $request->price,
-                'direction' => $request->direction ?? 0,
+                'priceservice' => $request->priceservice,
+                'priceElectricity' => $request->priceElectricity,
+                'pricewater' => $request->pricewater,
+                'floors' => $request->floors,
+                'rooms' => $request->rooms,
+                'bathrooms' => $request->bathrooms,
+                'bonus' => $request->bonus,
+                'bonusmonthly'=> $request->bonusmonthly,
+                'direction' => $request->direction,
+                'directionBalcony' => $request->directionBalcony,
+                'wayin'=> $request->wayin,
+                'font' => $request->font,
+                'pccc'=> $request->pccc,
+                'elevator' => $request->elevator,
+                'stairs' =>$request->stairs,
                 'unit' => $request->unit,
+                'unit1' => $request->unit1,
+                'unit2' => $request->unit2,
+                'unit3' => $request->unit3,
                 'sold_status' => $request->sold_status,
-                'user_id' => $request->user_id,
                 'status_id' => $request->status_id,
-                'created_at' => date('Y-m-d H:i:s'),
+                'priority_status' => $request->priority_status ?? "",
                 'updated_at' => date('Y-m-d H:i:s'),
+                'user_id' => $request->user_id
             ]
         );
 
-        Redis::del('posts:pending');
-        Redis::del('posts:not-pending');
+
 
 
         return response()->json($post, 201);
@@ -90,34 +101,34 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Redis::get('post:' . $id);
+        // $post = Redis::get('post:' . $id);
 
-        if ($post === null) {
-            $post = Post::with([
-                'user' => function ($query) {
-                    $query->select('id', 'name');
-                },
-                'status' => function ($query) {
-                    $query->select('id', 'name');
-                },
-                'postImage' => function ($query) {
-                    $query->select('id', 'post_id', 'image_path');
-                },
-                'comment' => function ($query) {
-                    $query->select('id', 'post_id', 'user_id', 'content', 'created_at')->orderBy('created_at', 'desc');
-                },
-                'comment.user' => function ($query) {
-                    $query->select('id', 'name');
-                },
-                'comment.commentImage'
-            ])->findOrFail($id);
+        // if ($post === null) {
+        $post = Post::with([
+            'user' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'status' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'postImage' => function ($query) {
+                $query->select('id', 'post_id', 'image_path');
+            },
+            'comment' => function ($query) {
+                $query->select('id', 'post_id', 'user_id', 'content', 'created_at')->orderBy('created_at', 'desc');
+            },
+            'comment.user' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'comment.commentImage'
+        ])->findOrFail($id);
 
 
-            Redis::set('post:' . $id, json_encode($post));
-            Redis::expire('post:' . $id, 3600);
-        } else {
-            $post = json_decode($post);
-        }
+        //     Redis::set('post:' . $id, json_encode($post));
+        //     Redis::expire('post:' . $id, 3600);
+        // } else {
+        //     $post = json_decode($post);
+        // }
 
 
         return response()->json($post, 200);
@@ -361,7 +372,7 @@ class PostController extends Controller
      * CreatedBy: youngbachhh (31/03/2024)
      */
 
-    public function update(Request $request, $id)
+    public function update($id, Request $request)
     {
         $post = Post::find($id);
         $post->update(
@@ -370,21 +381,40 @@ class PostController extends Controller
                 'description' => $request->description,
                 'address' => $request->address,
                 'address_detail' => $request->address_detail,
+                'classrank' => $request->classrank,
                 'area' => $request->area,
+                'areausable' => $request->areausable,
                 'price' => $request->price,
-                'direction' => $request->direction ?? 0,
+                'priceservice' => $request->priceservice,
+                'priceElectricity' => $request->priceElectricity,
+                'pricewater' => $request->pricewater,
+                'floors' => $request->floors,
+                'rooms' => $request->rooms,
+                'bathrooms' => $request->bathrooms,
+                'bonus' => $request->bonus,
+                'bonusmonthly' => $request->bonusmonthly,
+                'direction' => $request->direction,
+                'directionBalcony' => $request->directionBalcony,
+                'wayin'=> $request->wayin,
+                'font' => $request->font,
+                'pccc'=> $request->pccc,
+                'elevator' => $request->elevator,
+                'stairs' =>$request->stairs,
                 'unit' => $request->unit,
+                'unit1' => $request->unit1,
+                'unit2' => $request->unit2,
+                'unit3' => $request->unit3,
                 'sold_status' => $request->sold_status,
                 'status_id' => $request->status_id,
                 'priority_status' => $request->priority_status,
                 'updated_at' => date('Y-m-d H:i:s'),
             ]
         );
-        if (Redis::exists('post:' . $id)) {
-            Redis::del('post:' . $id);
-            Redis::del('posts:pending');
-            Redis::del('posts:not-pending');
-        }
+        // if (Redis::exists('post:' . $id)) {
+        //     Redis::del('post:' . $id);
+        //     Redis::del('posts:pending');
+        //     Redis::del('posts:not-pending');
+        // }
         return response()->json($post, 200);
     }
 
@@ -419,11 +449,7 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        if (Redis::get('post:' . $id) !== null) {
-            Redis::del('post:' . $id);
-        }
-        Redis::del('posts:pending');
-        Redis::del('posts:not-pending');
+
         $directoryName = 'post-' . $id;
         $post = Post::find($id);
         $images = $post->postImage;
