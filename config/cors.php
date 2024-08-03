@@ -19,9 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://qtland.site', 'http://123.31.31.39'],
+    'allowed_origins' => ['*'], // url của bên fe
 
-    'allowed_origins_patterns' => ["*localhost*"],
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 

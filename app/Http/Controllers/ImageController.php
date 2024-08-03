@@ -31,7 +31,7 @@ class ImageController extends Controller
                 Storage::disk('local')->put($storagePath, file_get_contents($file));
                 PostImage::create([
                     'post_id' => $post_id,
-                    'image_path' => "http://123.31.31.39/" . $storageUrl
+                    'image_path' => "http://127.0.0.1:8000/" . $storageUrl
                 ]);
                 $i = $i + 1;
             }
@@ -79,7 +79,7 @@ class ImageController extends Controller
             // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
             PostImage::create([
                 'post_id' => $post_id,
-                'image_path' => "http://123.31.31.39/" . $storageUrl
+                'image_path' => "http://127.0.0.1:8000/" . $storageUrl
             ]);
 
             $i++;
@@ -102,7 +102,7 @@ class ImageController extends Controller
                 CommentImage::create([
                     'comment_id' => $comment_id,
                     'post_id' => $post_id,
-                    'image_path' => "http://123.31.31.39/" . $storageUrl
+                    'image_path' => "http://127.0.0.1:8000/" . $storageUrl
                 ]);
                 $i = $i + 1;
             }
