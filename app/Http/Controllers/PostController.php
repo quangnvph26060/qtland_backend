@@ -201,7 +201,7 @@ class PostController extends Controller
     {
         $page = $request->input('page', 1);
         $pageSize = $request->input('pageSize', 10);
-        $priority = $request->input('priority', 'all');
+        $priority = $request->input('priority_status', 'all');
         $searchConditions = $request->input('searchConditions', []);
 
         // Generate a unique cache key based on request parameters
@@ -217,7 +217,7 @@ class PostController extends Controller
                 ->when(!$request->filled('address'), function ($query) {
                     $query->where('status_id', '!=', 3);
                 })
-                ->when($request->filled('priority') && $priority !== 'all', function ($query) use ($priority) {
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
                     $query->where('priority_status', $priority);
                 })
                 ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
@@ -278,11 +278,14 @@ class PostController extends Controller
 
     private function applyFilters($query, Request $request)
     {
+
         // Log::info($request->classrank);
         $defaultMinArea = 0;
         $defaultMaxArea = 1000;
         $defaultMinPrice = 0;
         $defaultMaxPrice = 60000000000;
+
+
 
         // Price range filter
         if ($request->filled(['min_price', 'max_price'])) {
@@ -304,9 +307,7 @@ class PostController extends Controller
         if ($request->filled('classrank')) {
             $query->where('classrank','=' ,$request->classrank);
         }
-        if ($request->filled('priority_status')) {
-            $query->where('priority_status','=' ,$request->priority_status);
-        }
+
         // Directions filter
         if ($request->filled('dirs') && is_array($request->dirs)) {
             $query->whereIn('direction', $request->dirs);
@@ -315,9 +316,9 @@ class PostController extends Controller
             $query->where('sold_status', $request->sold_status);
         }
 
-        if ($request->filled('priority_status') && is_array($request->priority_status)) {
-            $query->where('priority_status', $request->priority_status);
-        }
+        // if ($request->filled('priority_status') && is_array($request->priority_status)) {
+        //     $query->where('priority_status', $request->priority_status);
+        // }
 
         return $query;
     }
