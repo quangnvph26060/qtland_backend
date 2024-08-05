@@ -34,11 +34,28 @@ class ConfigController extends Controller
             $path = $config->logo;
         }
 
+        if ($request->hasFile('icon')) {
+            // Xóa ảnh cũ nếu có
+            if ($config->icon) {
+                Storage::disk('public')->delete($config->icon);
+            }
+
+            $icon = $request->file('icon');
+
+            $iconFileName = 'image_' . $icon->getClientOriginalName();
+            $iconFilePath = 'storage/config/' . $iconFileName;
+            Storage::putFileAs('public/config', $icon, $iconFileName);
+            $pathicon = "http://127.0.0.1:8000/".$iconFilePath;
+        } else {
+            $pathicon = $config->icon;
+        }
+
         // Cập nhật dữ liệu
         $config->update([
             'title' => $request->title,
             'description' => $request->description ?? "",
             'logo' => $path,
+            'icon' => $pathicon,
             'keyword' => $request->keyword ?? "",
         ]);
 

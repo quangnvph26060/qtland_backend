@@ -14,5 +14,6 @@ class Config extends Model
         'description',
         'keyword',
         'logo',
+        'icon'
     ];
 }
