@@ -62,6 +62,11 @@ class UserController extends Controller
             [
                 'name' => $request['name'],
                 'email' => $request['email'],
+                'cccd' => $request['cccd'],
+                'birthday' => $request['birthday'],
+                'phone' => $request['phone'],
+                'address' => $request['address'],
+                'workunit' => $request['workunit'],
                 'role_id' => ($request['role_id'] == null ? 3 : (int) $request['role_id']),
                 'is_active' => ($request['is_active'] == null ? 1 : (int) $request['is_active']),
                 'password' =>  Hash::make($request['password']),
@@ -133,6 +138,11 @@ class UserController extends Controller
             "password" => (empty($request->password) ? $user->password : Hash::make($request->password)),
             "role_id" => $request->role_id,
             "is_active" => $request->is_active,
+            'cccd' => $request->cccd,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'workunit' => $request->workunit,
+            'birthday' => $request->birthday,
             "updated_at" => date('Y-m-d H:i:s'),
         ]);
 

@@ -304,6 +304,9 @@ class PostController extends Controller
         if ($request->filled('classrank')) {
             $query->where('classrank','=' ,$request->classrank);
         }
+        if ($request->filled('priority_status')) {
+            $query->where('priority_status','=' ,$request->priority_status);
+        }
         // Directions filter
         if ($request->filled('dirs') && is_array($request->dirs)) {
             $query->whereIn('direction', $request->dirs);
