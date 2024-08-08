@@ -50,12 +50,29 @@ class ConfigController extends Controller
             $pathicon = $config->icon;
         }
 
+        if ($request->hasFile('banner')) {
+            // Xóa ảnh cũ nếu có
+            if ($config->banner) {
+                Storage::disk('public')->delete($config->banner);
+            }
+
+            $banner = $request->file('banner');
+
+            $bannerFileName = 'image_' . $banner->getClientOriginalName();
+            $bannerFilePath = 'storage/config/' . $bannerFileName;
+            Storage::putFileAs('public/config', $banner, $bannerFileName);
+            $pathbanner = "http://127.0.0.1:8000/".$bannerFilePath;
+        } else {
+            $pathbanner = $config->banner;
+        }
+
         // Cập nhật dữ liệu
         $config->update([
             'title' => $request->title,
             'description' => $request->description ?? "",
             'logo' => $path,
             'icon' => $pathicon,
+            'banner' => $pathbanner,
             'keyword' => $request->keyword ?? "",
         ]);
 

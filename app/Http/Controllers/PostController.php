@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class PostController extends Controller
 {
     /**
-     * Hàm lấy danh sách toàn bộ bài viết
+     * HÃ m láº¥y danh sÃ¡ch toÃ n bá»™ bÃ i viáº¿t
      * @param
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -41,7 +41,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lưu bài viết mới
+     * HÃ m lÆ°u bÃ i viáº¿t má»›i
      * @param Request $request
      * @return $users
      * CreatedBy: youngbachhh (04/04/2024)
@@ -94,7 +94,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lấy thông tin bài viết theo id
+     * HÃ m láº¥y thÃ´ng tin bÃ i viáº¿t theo id
      * @param Request $request
      * @return $users
      * CreatedBy: youngbachhh (31/03/2024)
@@ -106,7 +106,7 @@ class PostController extends Controller
         // if ($post === null) {
         $post = Post::with([
             'user' => function ($query) {
-                $query->select('id', 'name');
+                $query->select('*');
             },
             'status' => function ($query) {
                 $query->select('id', 'name');
@@ -135,7 +135,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lấy ra danh bài viết đang chờ duyệt
+     * HÃ m láº¥y ra danh bÃ i viáº¿t Ä‘ang chá» duyá»‡t
      * @param
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -163,7 +163,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lấy ra danh bài viết không phải đang chờ duyệt
+     * HÃ m láº¥y ra danh bÃ i viáº¿t khÃ´ng pháº£i Ä‘ang chá» duyá»‡t
      * @param
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -192,7 +192,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lọc bài viết theo giá và diện tích
+     * HÃ m lá»c bÃ i viáº¿t theo giÃ¡ vÃ  diá»‡n tÃ­ch
      * @param Request $request
      * @return $posts
      * CreatedBy: youngbachhh (23/04/2024)
@@ -326,7 +326,7 @@ class PostController extends Controller
 
 
     /**
-     * Hàm lấy ra danh sách bài viết theo user_id
+     * HÃ m láº¥y ra danh sÃ¡ch bÃ i viáº¿t theo user_id
      * @param Request $request
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -347,7 +347,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lấy ra tổng số bài viết theo user_id
+     * HÃ m láº¥y ra tá»•ng sá»‘ bÃ i viáº¿t theo user_id
      * @param $id
      * @return $total
      * CreatedBy: youngbachhh (28/04/2024)
@@ -371,7 +371,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm cập nhật thông tin bài viết theo id
+     * HÃ m cáº­p nháº­t thÃ´ng tin bÃ i viáº¿t theo id
      * @param Request $request, Post $post
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -442,12 +442,12 @@ class PostController extends Controller
 
         Redis::del('posts:pending');
         Redis::del('posts:not-pending');
-        return response()->json(['message' => 'Cập nhật trạng thái thành công'], 200);
+        return response()->json(['message' => 'Cập nhật thành công'], 200);
     }
 
 
     /**
-     * Hàm xóa bài viết theo id
+     * HÃ m xÃ³a bÃ i viáº¿t theo id
      * @param Post $post
      * @return message
      * CreatedBy: youngbachhh (31/03/2024)
