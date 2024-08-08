@@ -106,7 +106,7 @@ class PostController extends Controller
         // if ($post === null) {
         $post = Post::with([
             'user' => function ($query) {
-                $query->select('id', 'name');
+                $query->select('*');
             },
             'status' => function ($query) {
                 $query->select('id', 'name');

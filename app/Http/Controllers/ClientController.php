@@ -69,10 +69,20 @@ class ClientController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         $sheet->setCellValue('A1', 'Tên khách hàng');
+        $sheet->setCellValue('B1', 'Số điện thoại');
+        $sheet->setCellValue('C1', 'Địa chỉ');
+        $sheet->setCellValue('D1', 'Khu vực cần tìm');
+        $sheet->setCellValue('E1', 'Mục đích kinh doanh');
+        $sheet->setCellValue('F1', 'Diện tích cần tìm');
         $row = 2;
 
         foreach ($clients as $client) {
             $sheet->setCellValue('A' . $row, $client->name);
+            $sheet->setCellValue('B' . $row, $client->phone);
+            $sheet->setCellValue('C' . $row, $client->address);
+            $sheet->setCellValue('D' . $row, $client->searcharea);
+            $sheet->setCellValue('E' . $row, $client->business);
+            $sheet->setCellValue('F' . $row, $client->area);
             $row++;
         }
 
