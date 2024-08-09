@@ -10,6 +10,12 @@ use SebastianBergmann\CodeCoverage\Report\Xml\Report;
 
 class ReportClientController extends Controller
 {
+    public function index()
+    {
+        $reports = ReportClient::orderBy('created_at', 'desc') ->get();
+
+        return response()->json($reports, 200);
+    }
     public function getReportByUser($id)
     {
         $reports = ReportClient::where('user_id', $id)
@@ -28,10 +34,7 @@ class ReportClientController extends Controller
     public function update($id, Request $request)
     {
         $post = ReportClient::find($id);
-        Log::info($request->all());
-        $post->update([
-            'name' => $request->name,
-        ]);
+        $post->update($request->all());
         return response()->json($post, 200);
     }
 
@@ -50,7 +53,7 @@ class ReportClientController extends Controller
 
         foreach ($images as $image) {
             $image->delete();
-            Storage::delete('public/upload/images/report/' . $directoryName . '/' . basename($image->image_path));
+            Storage::delete('public/upload/images/report/' . $directoryName . '/' . basename($image->image));
         }
 
         $report->delete();

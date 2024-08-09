@@ -2,25 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReportCard;
 use App\Models\ReportClient;
-use App\Models\ReportImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class ImageReportController extends Controller
+class ReportCardController extends Controller
 {
     function upload(Request $request)
     {
-        if ($request->hasFile('files')) {
+        if ($request->hasFile('filecard')) {
             $report_id = $request->report_id;
             $i = 1;
-            foreach ($request->file('files') as $file) {
+            foreach ($request->file('filecard') as $file) {
                 $directoryName = 'report-' . ($report_id);
-                $storagePath = 'public/upload/images/report/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
-                $storageUrl = 'storage/upload/images/report/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+                $storagePath = 'public/upload/images/card/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+                $storageUrl = 'storage/upload/images/card/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
                 Storage::disk('local')->put($storagePath, file_get_contents($file));
-                ReportImage::create([
+                ReportCard::create([
                     'report_id' => $report_id,
                     'image' => "http://127.0.0.1:8000/" . $storageUrl
                 ]);
@@ -37,11 +37,11 @@ class ImageReportController extends Controller
         $report_id = $request->report_id;
         // Xóa hết các ảnh trong thư mục của bài viết
         $directoryName = ' -' . $report_id;
-        $directoryPath = 'public/upload/images/report/' . $directoryName;
+        $directoryPath = 'public/upload/images/card/' . $directoryName;
         $post = ReportClient::find($request->report_id);
-        $images = $post->images;
+        $images = $post->card;
 
-        $deleted_files = json_decode($request->deleted_files);
+        $deleted_files = json_decode($request->deleted_file_card);
 
         foreach ($images as $image) {
             $check = false;
@@ -57,19 +57,19 @@ class ImageReportController extends Controller
                 continue;
             }
             $image->delete();
-            Storage::delete('public/upload/images/report/' . $directoryName . '/' . basename($image->image));
+            Storage::delete('public/upload/images/card/' . $directoryName . '/' . basename($image->image));
         }
-        if($request->file('files')){
+        if($request->file('filecard')){
             $i = 1;
-            foreach ($request->file('files') as $file) {
+            foreach ($request->file('filecard') as $file) {
                 // Lưu ảnh mới vào thư mục của bài viết
                 $storagePath = $directoryPath . '/' . $i . '.' . $file->getClientOriginalExtension();
                 Log::info($storagePath);
-                $storageUrl = 'storage/upload/images/report/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+                $storageUrl = 'storage/upload/images/card/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
                 Storage::disk('local')->put($storagePath, file_get_contents($file));
 
                 // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
-                ReportImage::create([
+                ReportCard::create([
                     'report_id' => $report_id,
                     'image' => "http://127.0.0.1:8000/" . $storageUrl
                 ]);

@@ -212,7 +212,7 @@ class PostController extends Controller
         if ($cachedPosts) {
             return response()->json(json_decode($cachedPosts), 200);
         } else {
-            $postsQuery = Post::with(['user:id,name,role_id', 'status:id,name', 'postImage'])
+            $postsQuery = Post::with([ 'status:id,name', 'postImage'])
                 ->withCount('views')
                 ->when(!$request->filled('address'), function ($query) {
                     $query->where('status_id', '!=', 3);
