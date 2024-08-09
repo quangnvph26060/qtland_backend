@@ -22,7 +22,7 @@ class ReportClient extends Model
         'post_id'
     ];
 
-    protected $appends = ['user', 'post', 'images'];
+    protected $appends = ['user', 'post', 'images', 'card'];
     public function getUserAttribute()
     {
         return User::where('id', $this->attributes['user_id'])->first();
@@ -34,5 +34,10 @@ class ReportClient extends Model
     public function getImagesAttribute()
     {
         return ReportImage::where('report_id', $this->attributes['id'])->get();
+    }
+
+    public function getCardAttribute()
+    {
+        return ReportCard::where('report_id', $this->attributes['id'])->get();
     }
 }
