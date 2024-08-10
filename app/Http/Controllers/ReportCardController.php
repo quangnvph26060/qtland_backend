@@ -35,7 +35,9 @@ class ReportCardController extends Controller
 
     function update(Request $request)
     {
+
         $appUrl = env('APP_URL');
+
         $report_id = $request->report_id;
         // Xóa hết các ảnh trong thư mục của bài viết
         $directoryName = ' -' . $report_id;
@@ -73,7 +75,9 @@ class ReportCardController extends Controller
                 // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
                 ReportCard::create([
                     'report_id' => $report_id,
+
                     'image' =>   $appUrl."/" . $storageUrl
+
                 ]);
 
                 $i++;
