@@ -12,6 +12,7 @@ class ImageReportController extends Controller
 {
     function upload(Request $request)
     {
+        $appUrl = env('APP_URL');
         if ($request->hasFile('files')) {
             $report_id = $request->report_id;
             $i = 1;
@@ -22,7 +23,7 @@ class ImageReportController extends Controller
                 Storage::disk('local')->put($storagePath, file_get_contents($file));
                 ReportImage::create([
                     'report_id' => $report_id,
-                    'image' => "http://127.0.0.1:8000/" . $storageUrl
+                    'image' => $appUrl."/" . $storageUrl
                 ]);
                 $i = $i + 1;
             }
@@ -34,6 +35,7 @@ class ImageReportController extends Controller
 
     function update(Request $request)
     {
+        $appUrl = env('APP_URL');
         $report_id = $request->report_id;
         // Xóa hết các ảnh trong thư mục của bài viết
         $directoryName = ' -' . $report_id;
@@ -71,7 +73,7 @@ class ImageReportController extends Controller
                 // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
                 ReportImage::create([
                     'report_id' => $report_id,
-                    'image' => "http://127.0.0.1:8000/" . $storageUrl
+                    'image' => $appUrl."/" . $storageUrl
                 ]);
 
                 $i++;
