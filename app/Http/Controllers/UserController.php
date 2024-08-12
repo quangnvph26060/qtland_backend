@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -161,5 +163,21 @@ class UserController extends Controller
         $user = User::find($id);
         $user->delete();
         return response()->json(['message' => 'Xóa thành công'], 200);
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $user = User::find($request->id);
+        $appUrl = env('APP_URL');
+        if ($request->hasFile('avatar')) {
+            // Xóa ảnh cũ nếu có
+            $path = $request->file('avatar')->store('public/upload/images/avatar');
+            $relativePath = str_replace('public/', 'storage/', $path); // Chuyển đổi đường dẫn lưu trữ sang URL
+            $user->avatar = $appUrl . '/' . $relativePath;
+        }
+
+        $user->save();
+        $user = User::find($request->input('id'));
+        return response()->json($user, 200);
     }
 }

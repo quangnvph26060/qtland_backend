@@ -476,4 +476,16 @@ class PostController extends Controller
         $post->delete();
         return response()->json(['message' => 'Xóa thành công'], 200);
     }
+
+    public function updateSold($id, Request $request)
+    {
+        $post = Post::find($id);
+        $post->update(
+            [
+                'sold_status' => $request->sold_status,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        );
+        return response()->json($post, 200);
+    }
 }

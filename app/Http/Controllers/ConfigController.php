@@ -17,6 +17,7 @@ class ConfigController extends Controller
 
     public function update(Request $request){
         Log::info($request->all());
+        $appUrl = env('APP_URL');
         $config = Config::first();
         if ($request->hasFile('logo')) {
             // Xóa ảnh cũ nếu có
@@ -29,7 +30,7 @@ class ConfigController extends Controller
             $logoFileName = 'image_' . $logo->getClientOriginalName();
             $logoFilePath = 'storage/config/' . $logoFileName;
             Storage::putFileAs('public/config', $logo, $logoFileName);
-            $path = "http://127.0.0.1:8000/".$logoFilePath;
+            $path = $appUrl."/".$logoFilePath;
         } else {
             $path = $config->logo;
         }
@@ -45,7 +46,7 @@ class ConfigController extends Controller
             $iconFileName = 'image_' . $icon->getClientOriginalName();
             $iconFilePath = 'storage/config/' . $iconFileName;
             Storage::putFileAs('public/config', $icon, $iconFileName);
-            $pathicon = "http://127.0.0.1:8000/".$iconFilePath;
+            $pathicon = $appUrl."/".$iconFilePath;
         } else {
             $pathicon = $config->icon;
         }
@@ -61,7 +62,7 @@ class ConfigController extends Controller
             $bannerFileName = 'image_' . $banner->getClientOriginalName();
             $bannerFilePath = 'storage/config/' . $bannerFileName;
             Storage::putFileAs('public/config', $banner, $bannerFileName);
-            $pathbanner = "http://127.0.0.1:8000/".$bannerFilePath;
+            $pathbanner = $appUrl."/".$bannerFilePath;
         } else {
             $pathbanner = $config->banner;
         }
