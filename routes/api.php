@@ -81,6 +81,8 @@ Route::group(['prefix' => 'posts'], function () {
     Route::patch('/{id}', [PostController::class, 'updateStatus']);
     Route::delete('/{id}', [PostController::class, 'destroy']);
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
+    Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
+    Route::post('/avater/update-avatar', [UserController::class, 'updateAvatar']);
 });
 Route::group(['prefix' => 'client'], function(){
     Route::get('', [ClientController::class, 'index']);
