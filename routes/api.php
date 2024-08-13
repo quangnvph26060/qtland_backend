@@ -52,6 +52,7 @@ Route::group(['prefix' => 'auth'], function () {
 // Route for users
 Route::group(['prefix' => 'users'], function () {
     Route::get('', [UserController::class, 'index']);
+    Route::get('/user-role/role', [UserController::class, 'userrole']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::get('/{id}/name', [UserController::class, 'getName']);
     Route::post('', [UserController::class, 'store']);
@@ -89,7 +90,7 @@ Route::group(['prefix' => 'posts'], function () {
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
     Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
     Route::post('/avater/update-avatar', [UserController::class, 'updateAvatar']);
-   
+
 });
 Route::group(['prefix' => 'client'], function(){
     Route::get('', [ClientController::class, 'index']);

@@ -24,6 +24,13 @@ class UserController extends Controller
         return User::withCount('post')->get();
     }
 
+    public function userrole()
+    {
+        return User::withCount('post')
+        ->whereNotIn('role_id', [1, 6])
+        ->get();
+    }
+
     /**
      * Hàm tạo mới người dùng
      * @param
@@ -182,13 +189,13 @@ class UserController extends Controller
         return response()->json($user, 200);
     }
     public function changePassWord(Request $request){
-         
+
         //   $request->validate([
         //     'current_password' => 'required',
         //     'new_password' => 'required|min:8|confirmed',
         // ]);
 
-        
+
         $user = User::find($request->id);
         Log::info($user);
         if (!Hash::check($request->current_password, $user->password)) {
