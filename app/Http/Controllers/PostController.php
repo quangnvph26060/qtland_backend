@@ -23,7 +23,7 @@ class PostController extends Controller
     {
         //
         $posts = Post::with(['user', 'status', 'postImage'])->orderBy('created_at', 'DESC');
-        if($request->address){
+        if ($request->address) {
             $posts->where('address', $request->address);
         }
         $posts = $posts->get();
@@ -67,14 +67,14 @@ class PostController extends Controller
                 'rooms' => $request->rooms,
                 'bathrooms' => $request->bathrooms,
                 'bonus' => $request->bonus,
-                'bonusmonthly'=> $request->bonusmonthly,
+                'bonusmonthly' => $request->bonusmonthly,
                 'direction' => $request->direction,
                 'directionBalcony' => $request->directionBalcony,
-                'wayin'=> $request->wayin,
+                'wayin' => $request->wayin,
                 'font' => $request->font,
-                'pccc'=> $request->pccc,
+                'pccc' => $request->pccc,
                 'elevator' => $request->elevator,
-                'stairs' =>$request->stairs,
+                'stairs' => $request->stairs,
                 'unit' => $request->unit,
                 'unit1' => $request->unit1,
                 'unit2' => $request->unit2,
@@ -134,6 +134,18 @@ class PostController extends Controller
         return response()->json($post, 200);
     }
 
+    public function showpostByid($id)
+    {
+
+        $post = Post::where('status_id', 4)->where('id', $id)->first();
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        return response()->json($post, 200);
+    }
+
     /**
      * HÃ m láº¥y ra danh bÃ i viáº¿t Ä‘ang chá» duyá»‡t
      * @param
@@ -142,24 +154,30 @@ class PostController extends Controller
      */
     public function pending()
     {
-        $posts = Redis::get('posts:pending');
+        // $posts = Redis::get('posts:pending');
 
-        if ($posts === null) {
-            $posts = Post::with(['user' => function ($query) {
-                $query->select('id', 'name');
-            }, 'status' => function ($query) {
-                $query->select('id', 'name');
-            }, 'postImage'])->where('status_id', 3)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        // if ($posts === null) {
+        //     $posts = Post::with(['user' => function ($query) {
+        //         $query->select('id', 'name');
+        //     }, 'status' => function ($query) {
+        //         $query->select('id', 'name');
+        //     }, 'postImage'])->where('status_id', 3)
+        //         ->orderBy('created_at', 'desc')
+        //         ->get();
 
-            Redis::set('posts:pending', json_encode($posts));
-            Redis::expire('posts:pending', 3600);
-        } else {
-            $posts = json_decode($posts);
-        }
+        //     Redis::set('posts:pending', json_encode($posts));
+        //     Redis::expire('posts:pending', 3600);
+        // } else {
+        //     $posts = json_decode($posts);
+        // }
 
-        return response()->json($posts, 200);
+        // return response()->json($posts, 200);
+        $posts = Post::with(['user', 'status', 'postImage'])->where('status_id', 3)->orderBy('created_at', 'DESC');
+        // if($request->address){
+        //     $posts->where('address', $request->address);
+        // }
+        $posts = $posts->get();
+        return response()->json($posts);
     }
 
     /**
@@ -212,7 +230,7 @@ class PostController extends Controller
         if ($cachedPosts) {
             return response()->json(json_decode($cachedPosts), 200);
         } else {
-            $postsQuery = Post::with([ 'status:id,name', 'postImage'])
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
                 ->withCount('views')
                 ->when(!$request->filled('address'), function ($query) {
                     $query->where('status_id', '!=', 3);
@@ -305,7 +323,7 @@ class PostController extends Controller
             }
         }
         if ($request->filled('classrank')) {
-            $query->where('classrank','=' ,$request->classrank);
+            $query->where('classrank', '=', $request->classrank);
         }
 
         // Directions filter
@@ -400,11 +418,11 @@ class PostController extends Controller
                 'bonusmonthly' => $request->bonusmonthly,
                 'direction' => $request->direction,
                 'directionBalcony' => $request->directionBalcony,
-                'wayin'=> $request->wayin,
+                'wayin' => $request->wayin,
                 'font' => $request->font,
-                'pccc'=> $request->pccc,
+                'pccc' => $request->pccc,
                 'elevator' => $request->elevator,
-                'stairs' =>$request->stairs,
+                'stairs' => $request->stairs,
                 'unit' => $request->unit,
                 'unit1' => $request->unit1,
                 'unit2' => $request->unit2,
