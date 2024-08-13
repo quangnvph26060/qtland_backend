@@ -60,6 +60,7 @@ Route::group(['prefix' => 'users'], function () {
 });
 
 Route::post('/send-email', [EmailController::class, 'sendEmail']);
+Route::post('/send-email-password', [EmailController::class, 'sendEmailPassword']);
 
 Route::group(['prefix' => 'report'], function () {
     Route::get('', [ReportClientController::class, 'index']);
