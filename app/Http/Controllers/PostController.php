@@ -23,7 +23,9 @@ class PostController extends Controller
     {
         //
         $posts = Post::with(['user', 'status', 'postImage'])->orderBy('created_at', 'DESC');
+
         if ($request->address) {
+
             $posts->where('address', $request->address);
         }
         $posts = $posts->get();
@@ -67,14 +69,14 @@ class PostController extends Controller
                 'rooms' => $request->rooms,
                 'bathrooms' => $request->bathrooms,
                 'bonus' => $request->bonus,
-                'bonusmonthly' => $request->bonusmonthly,
+                'bonusmonthly'=> $request->bonusmonthly,
                 'direction' => $request->direction,
                 'directionBalcony' => $request->directionBalcony,
-                'wayin' => $request->wayin,
+                'wayin'=> $request->wayin,
                 'font' => $request->font,
-                'pccc' => $request->pccc,
+                'pccc'=> $request->pccc,
                 'elevator' => $request->elevator,
-                'stairs' => $request->stairs,
+                'stairs' =>$request->stairs,
                 'unit' => $request->unit,
                 'unit1' => $request->unit1,
                 'unit2' => $request->unit2,
@@ -106,7 +108,10 @@ class PostController extends Controller
         // if ($post === null) {
         $post = Post::with([
             'user' => function ($query) {
+
+
                 $query->select('*');
+
             },
             'status' => function ($query) {
                 $query->select('id', 'name');
@@ -418,11 +423,11 @@ class PostController extends Controller
                 'bonusmonthly' => $request->bonusmonthly,
                 'direction' => $request->direction,
                 'directionBalcony' => $request->directionBalcony,
-                'wayin' => $request->wayin,
+                'wayin'=> $request->wayin,
                 'font' => $request->font,
-                'pccc' => $request->pccc,
+                'pccc'=> $request->pccc,
                 'elevator' => $request->elevator,
-                'stairs' => $request->stairs,
+                'stairs' =>$request->stairs,
                 'unit' => $request->unit,
                 'unit1' => $request->unit1,
                 'unit2' => $request->unit2,

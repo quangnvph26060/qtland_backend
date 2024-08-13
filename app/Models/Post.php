@@ -13,16 +13,16 @@ class Post extends Model
     use HasFactory;
 
 
-    protected static function booted()
-    {
-        static::saved(function ($post) {
-            Redis::flushAll();
-        });
+    // protected static function booted()
+    // {
+    //     static::saved(function ($post) {
+    //         Redis::flushAll();
+    //     });
 
-        static::deleted(function ($post) {
-            Redis::flushAll();
-        });
-    }
+    //     static::deleted(function ($post) {
+    //         Redis::flushAll();
+    //     });
+    // }
 
 
     protected $fillable = [
@@ -100,6 +100,6 @@ class Post extends Model
 
     public function views()
     {
-        return $this->hasMany(PostView::class);
+        return $this->hasMany(PostView::class)->with('user');
     }
 }
