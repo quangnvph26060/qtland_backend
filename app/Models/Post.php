@@ -73,7 +73,11 @@ class Post extends Model
     //         'address_detail' => $this->address_detail,
     //     ];
     // }
-
+    protected $appends = ['user_info'];
+    public function getUserInfoAttribute()
+    {
+        return User::where('id', $this->attributes['user_id'])->first();
+    }
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

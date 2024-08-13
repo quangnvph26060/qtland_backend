@@ -21,6 +21,7 @@ class ImageController extends Controller
      */
     function upload(Request $request)
     {
+        $appUrl = env('APP_URL');
         if ($request->hasFile('files')) {
             $post_id = $request->post_id;
             $i = 1;
@@ -31,7 +32,7 @@ class ImageController extends Controller
                 Storage::disk('local')->put($storagePath, file_get_contents($file));
                 PostImage::create([
                     'post_id' => $post_id,
-                    'image_path' => "http://127.0.0.1:8000/" . $storageUrl
+                    'image_path' => $appUrl ."/" . $storageUrl
                 ]);
                 $i = $i + 1;
             }
@@ -43,7 +44,7 @@ class ImageController extends Controller
 
     function update(Request $request)
     {
-
+        $appUrl = env('APP_URL');
         $post_id = $request->post_id;
         // Xóa hết các ảnh trong thư mục của bài viết
         $directoryName = 'post-' . $post_id;
@@ -79,7 +80,7 @@ class ImageController extends Controller
             // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
             PostImage::create([
                 'post_id' => $post_id,
-                'image_path' => "http://127.0.0.1:8000/" . $storageUrl
+                'image_path' => $appUrl ."/" . $storageUrl
             ]);
 
             $i++;

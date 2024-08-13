@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class PostController extends Controller
 {
     /**
-     * Hàm lấy danh sách toàn bộ bài viết
+     * HÃ m láº¥y danh sÃ¡ch toÃ n bá»™ bÃ i viáº¿t
      * @param
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -23,7 +23,9 @@ class PostController extends Controller
     {
         //
         $posts = Post::with(['user', 'status', 'postImage'])->orderBy('created_at', 'DESC');
-        if($request->address){
+
+        if ($request->address) {
+
             $posts->where('address', $request->address);
         }
         $posts = $posts->get();
@@ -41,7 +43,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lưu bài viết mới
+     * HÃ m lÆ°u bÃ i viáº¿t má»›i
      * @param Request $request
      * @return $users
      * CreatedBy: youngbachhh (04/04/2024)
@@ -94,7 +96,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lấy thông tin bài viết theo id
+     * HÃ m láº¥y thÃ´ng tin bÃ i viáº¿t theo id
      * @param Request $request
      * @return $users
      * CreatedBy: youngbachhh (31/03/2024)
@@ -106,7 +108,10 @@ class PostController extends Controller
         // if ($post === null) {
         $post = Post::with([
             'user' => function ($query) {
-                $query->select('id', 'name');
+
+
+                $query->select('*');
+
             },
             'status' => function ($query) {
                 $query->select('id', 'name');
@@ -134,36 +139,54 @@ class PostController extends Controller
         return response()->json($post, 200);
     }
 
+    public function showpostByid($id)
+    {
+
+        $post = Post::where('status_id', 4)->where('id', $id)->first();
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        return response()->json($post, 200);
+    }
+
     /**
-     * Hàm lấy ra danh bài viết đang chờ duyệt
+     * HÃ m láº¥y ra danh bÃ i viáº¿t Ä‘ang chá» duyá»‡t
      * @param
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
      */
     public function pending()
     {
-        $posts = Redis::get('posts:pending');
+        // $posts = Redis::get('posts:pending');
 
-        if ($posts === null) {
-            $posts = Post::with(['user' => function ($query) {
-                $query->select('id', 'name');
-            }, 'status' => function ($query) {
-                $query->select('id', 'name');
-            }, 'postImage'])->where('status_id', 3)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        // if ($posts === null) {
+        //     $posts = Post::with(['user' => function ($query) {
+        //         $query->select('id', 'name');
+        //     }, 'status' => function ($query) {
+        //         $query->select('id', 'name');
+        //     }, 'postImage'])->where('status_id', 3)
+        //         ->orderBy('created_at', 'desc')
+        //         ->get();
 
-            Redis::set('posts:pending', json_encode($posts));
-            Redis::expire('posts:pending', 3600);
-        } else {
-            $posts = json_decode($posts);
-        }
+        //     Redis::set('posts:pending', json_encode($posts));
+        //     Redis::expire('posts:pending', 3600);
+        // } else {
+        //     $posts = json_decode($posts);
+        // }
 
-        return response()->json($posts, 200);
+        // return response()->json($posts, 200);
+        $posts = Post::with(['user', 'status', 'postImage'])->where('status_id', 3)->orderBy('created_at', 'DESC');
+        // if($request->address){
+        //     $posts->where('address', $request->address);
+        // }
+        $posts = $posts->get();
+        return response()->json($posts);
     }
 
     /**
-     * Hàm lấy ra danh bài viết không phải đang chờ duyệt
+     * HÃ m láº¥y ra danh bÃ i viáº¿t khÃ´ng pháº£i Ä‘ang chá» duyá»‡t
      * @param
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -192,7 +215,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lọc bài viết theo giá và diện tích
+     * HÃ m lá»c bÃ i viáº¿t theo giÃ¡ vÃ  diá»‡n tÃ­ch
      * @param Request $request
      * @return $posts
      * CreatedBy: youngbachhh (23/04/2024)
@@ -201,7 +224,7 @@ class PostController extends Controller
     {
         $page = $request->input('page', 1);
         $pageSize = $request->input('pageSize', 10);
-        $priority = $request->input('priority', 'all');
+        $priority = $request->input('priority_status', 'all');
         $searchConditions = $request->input('searchConditions', []);
 
         // Generate a unique cache key based on request parameters
@@ -212,12 +235,12 @@ class PostController extends Controller
         if ($cachedPosts) {
             return response()->json(json_decode($cachedPosts), 200);
         } else {
-            $postsQuery = Post::with(['user:id,name,role_id', 'status:id,name', 'postImage'])
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
                 ->withCount('views')
                 ->when(!$request->filled('address'), function ($query) {
                     $query->where('status_id', '!=', 3);
                 })
-                ->when($request->filled('priority') && $priority !== 'all', function ($query) use ($priority) {
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
                     $query->where('priority_status', $priority);
                 })
                 ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
@@ -249,13 +272,12 @@ class PostController extends Controller
             }
 
 
-
+            // Log::info($request->all());
             // Apply filters
             $postsQuery = $this->applyFilters($postsQuery, $request);
 
             // Apply pagination
             $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
-
             // Cache the result for 10 minutes
             Redis::setex($cacheKey, 600, $posts->toJson());
 
@@ -272,17 +294,21 @@ class PostController extends Controller
                 ->orWhere('address', 'LIKE', '%' . $address . '%')
                 ->orWhere('address_detail', 'LIKE', '%' . $address . '%');
         });
-        Log::info("Address: " . $address);
+        // Log::info("Address: " . $address);
 
         return $query;
     }
 
     private function applyFilters($query, Request $request)
     {
+
+        // Log::info($request->classrank);
         $defaultMinArea = 0;
         $defaultMaxArea = 1000;
         $defaultMinPrice = 0;
         $defaultMaxPrice = 60000000000;
+
+
 
         // Price range filter
         if ($request->filled(['min_price', 'max_price'])) {
@@ -301,19 +327,21 @@ class PostController extends Controller
                 $query->whereBetween('area', [$minArea, $maxArea]);
             }
         }
+        if ($request->filled('classrank')) {
+            $query->where('classrank', '=', $request->classrank);
+        }
 
         // Directions filter
         if ($request->filled('dirs') && is_array($request->dirs)) {
             $query->whereIn('direction', $request->dirs);
         }
-
         if ($request->filled('sold_status') && is_array($request->sold_status)) {
             $query->where('sold_status', $request->sold_status);
         }
 
-        if ($request->filled('priority_status') && is_array($request->priority_status)) {
-            $query->where('priority_status', $request->priority_status);
-        }
+        // if ($request->filled('priority_status') && is_array($request->priority_status)) {
+        //     $query->where('priority_status', $request->priority_status);
+        // }
 
         return $query;
     }
@@ -321,7 +349,7 @@ class PostController extends Controller
 
 
     /**
-     * Hàm lấy ra danh sách bài viết theo user_id
+     * HÃ m láº¥y ra danh sÃ¡ch bÃ i viáº¿t theo user_id
      * @param Request $request
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -342,7 +370,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm lấy ra tổng số bài viết theo user_id
+     * HÃ m láº¥y ra tá»•ng sá»‘ bÃ i viáº¿t theo user_id
      * @param $id
      * @return $total
      * CreatedBy: youngbachhh (28/04/2024)
@@ -366,7 +394,7 @@ class PostController extends Controller
     }
 
     /**
-     * Hàm cập nhật thông tin bài viết theo id
+     * HÃ m cáº­p nháº­t thÃ´ng tin bÃ i viáº¿t theo id
      * @param Request $request, Post $post
      * @return $posts
      * CreatedBy: youngbachhh (31/03/2024)
@@ -437,12 +465,12 @@ class PostController extends Controller
 
         Redis::del('posts:pending');
         Redis::del('posts:not-pending');
-        return response()->json(['message' => 'Cập nhật trạng thái thành công'], 200);
+        return response()->json(['message' => 'Cập nhật thành công'], 200);
     }
 
 
     /**
-     * Hàm xóa bài viết theo id
+     * HÃ m xÃ³a bÃ i viáº¿t theo id
      * @param Post $post
      * @return message
      * CreatedBy: youngbachhh (31/03/2024)
@@ -470,5 +498,17 @@ class PostController extends Controller
 
         $post->delete();
         return response()->json(['message' => 'Xóa thành công'], 200);
+    }
+
+    public function updateSold($id, Request $request)
+    {
+        $post = Post::find($id);
+        $post->update(
+            [
+                'sold_status' => $request->sold_status,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        );
+        return response()->json($post, 200);
     }
 }

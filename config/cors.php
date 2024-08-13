@@ -19,9 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
 
     'allowed_origins' => ['*'], // url của bên fe
+
+    'allowed_origins_patterns' => [],
+
 
     'allowed_headers' => ['*'],
 

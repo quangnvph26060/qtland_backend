@@ -15,8 +15,9 @@ class ConfigController extends Controller
         return response()->json(['status'=> 'success','data'=>$config]);
     }
 
-    public function update(Request $request){ 
+    public function update(Request $request){
         Log::info($request->all());
+        $appUrl = env('APP_URL');
         $config = Config::first();
         if ($request->hasFile('logo')) {
             // Xóa ảnh cũ nếu có
@@ -25,13 +26,45 @@ class ConfigController extends Controller
             }
 
             $logo = $request->file('logo');
-           
+
             $logoFileName = 'image_' . $logo->getClientOriginalName();
             $logoFilePath = 'storage/config/' . $logoFileName;
             Storage::putFileAs('public/config', $logo, $logoFileName);
-            $path = "http://127.0.0.1:8000/".$logoFilePath;
+            $path = $appUrl."/".$logoFilePath;
         } else {
             $path = $config->logo;
+        }
+
+        if ($request->hasFile('icon')) {
+            // Xóa ảnh cũ nếu có
+            if ($config->icon) {
+                Storage::disk('public')->delete($config->icon);
+            }
+
+            $icon = $request->file('icon');
+
+            $iconFileName = 'image_' . $icon->getClientOriginalName();
+            $iconFilePath = 'storage/config/' . $iconFileName;
+            Storage::putFileAs('public/config', $icon, $iconFileName);
+            $pathicon = $appUrl."/".$iconFilePath;
+        } else {
+            $pathicon = $config->icon;
+        }
+
+        if ($request->hasFile('banner')) {
+            // Xóa ảnh cũ nếu có
+            if ($config->banner) {
+                Storage::disk('public')->delete($config->banner);
+            }
+
+            $banner = $request->file('banner');
+
+            $bannerFileName = 'image_' . $banner->getClientOriginalName();
+            $bannerFilePath = 'storage/config/' . $bannerFileName;
+            Storage::putFileAs('public/config', $banner, $bannerFileName);
+            $pathbanner = $appUrl."/".$bannerFilePath;
+        } else {
+            $pathbanner = $config->banner;
         }
 
         // Cập nhật dữ liệu
@@ -39,6 +72,8 @@ class ConfigController extends Controller
             'title' => $request->title,
             'description' => $request->description ?? "",
             'logo' => $path,
+            'icon' => $pathicon,
+            'banner' => $pathbanner,
             'keyword' => $request->keyword ?? "",
         ]);
 

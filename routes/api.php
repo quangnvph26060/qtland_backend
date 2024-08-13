@@ -9,8 +9,11 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\ImageReportController;
 use App\Http\Controllers\PostViewController;
-
+use App\Http\Controllers\ReportCardController;
+use App\Http\Controllers\ReportClientController;
+use App\Http\Controllers\EmailController;
 use Illuminate\Support\Facades\Redis;
 
 /*
@@ -56,17 +59,46 @@ Route::group(['prefix' => 'users'], function () {
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
+Route::post('/send-email', [EmailController::class, 'sendEmail']);
+
+Route::group(['prefix' => 'report'], function () {
+    Route::get('', [ReportClientController::class, 'index']);
+    Route::get('/filter', [PostController::class, 'filter']);
+    Route::get('/user/{id}', [ReportClientController::class, 'getReportByUser']);
+    Route::get('/{id}', [ReportClientController::class, 'show']);
+    Route::post('', [ReportClientController::class, 'store']);
+    Route::put('/{id}', [ReportClientController::class, 'update']);
+    Route::patch('/{id}', [PostController::class, 'updateStatus']);
+    Route::delete('/{id}', [ReportClientController::class, 'destroy']);
+    Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
+});
+
 // Route for posts
 Route::group(['prefix' => 'posts'], function () {
     Route::get('', [PostController::class, 'index']);
     Route::get('/filter', [PostController::class, 'filter']);
     Route::get('/user/{id}', [PostController::class, 'getPostByUser']);
     Route::get('/{id}', [PostController::class, 'show']);
+    Route::get('/postbyid/{id}', [PostController::class, 'showpostByid']);
     Route::post('', [PostController::class, 'store']);
     Route::put('/{id}', [PostController::class, 'update']);
     Route::patch('/{id}', [PostController::class, 'updateStatus']);
     Route::delete('/{id}', [PostController::class, 'destroy']);
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
+    Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
+    Route::post('/avater/update-avatar', [UserController::class, 'updateAvatar']);
+});
+Route::group(['prefix' => 'client'], function(){
+    Route::get('', [ClientController::class, 'index']);
+    Route::get('/{id}', [ClientController::class, 'show']);
+    Route::post('/{id}', [ClientController::class, 'update']);
+    Route::delete('/{id}', [ClientController::class, 'destroy']);
+    Route::get('/export/client', [ClientController::class, 'export']);
+});
+
+Route::group(['prefix' => 'config'], function(){
+    Route::get('', [ConfigController::class, 'detail']);
+    Route::post('', [ConfigController::class, 'update']);
 });
 Route::group(['prefix' => 'client'], function(){
     Route::get('', [ClientController::class, 'index']);
@@ -88,6 +120,11 @@ Route::get('/images/{id}', [ImageController::class, 'show']);
 Route::post('/uploadMultiple', [ImageController::class, 'upload']);
 Route::post('/updateMultiple', [ImageController::class, 'update']);
 Route::post('/uploadMultipleCommentImg', [ImageController::class, 'uploadCommentImg']);
+Route::post('/updateMultiplereport', [ImageReportController::class, 'update']);
+Route::post('/uploadMultiplereport', [ImageReportController::class, 'upload']);
+
+Route::post('/updateMultiplecard', [ReportCardController::class, 'update']);
+Route::post('/uploadMultiplecard', [ReportCardController::class, 'upload']);
 
 
 // Route for comments
