@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SampleMail extends Mailable
+class SendPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -32,7 +32,7 @@ class SampleMail extends Mailable
      */
     public function build()
     {
-        return $this->view('email.sample')
+        return $this->view('email.samplepassword')
                     ->with('data', $this->data)
                     ->subject('Thông báo từ hệ thống');;
     }
