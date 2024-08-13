@@ -13,6 +13,7 @@ use App\Http\Controllers\ImageReportController;
 use App\Http\Controllers\PostViewController;
 use App\Http\Controllers\ReportCardController;
 use App\Http\Controllers\ReportClientController;
+use App\Http\Controllers\EmailController;
 use Illuminate\Support\Facades\Redis;
 
 /*
@@ -58,6 +59,8 @@ Route::group(['prefix' => 'users'], function () {
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
+Route::post('/send-email', [EmailController::class, 'sendEmail']);
+
 Route::group(['prefix' => 'report'], function () {
     Route::get('', [ReportClientController::class, 'index']);
     Route::get('/filter', [PostController::class, 'filter']);
@@ -76,6 +79,7 @@ Route::group(['prefix' => 'posts'], function () {
     Route::get('/filter', [PostController::class, 'filter']);
     Route::get('/user/{id}', [PostController::class, 'getPostByUser']);
     Route::get('/{id}', [PostController::class, 'show']);
+    Route::get('/postbyid/{id}', [PostController::class, 'showpostByid']);
     Route::post('', [PostController::class, 'store']);
     Route::put('/{id}', [PostController::class, 'update']);
     Route::patch('/{id}', [PostController::class, 'updateStatus']);
