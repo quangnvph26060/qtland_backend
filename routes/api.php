@@ -81,6 +81,7 @@ Route::group(['prefix' => 'posts'], function () {
     Route::get('', [PostController::class, 'index']);
     Route::get('/filter', [PostController::class, 'filter']);
     Route::get('/user/{id}', [PostController::class, 'getPostByUser']);
+    Route::get('/user-status/{id}', [PostController::class, 'getPostStatusByUser']);
     Route::get('/{id}', [PostController::class, 'show']);
     Route::get('/postbyid/{id}', [PostController::class, 'showpostByid']);
     Route::post('', [PostController::class, 'store']);
