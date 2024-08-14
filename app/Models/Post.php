@@ -57,6 +57,8 @@ class Post extends Model
         'status_id',
         'priority_status',
         'user_id',
+        'gop',
+        'pay',
     ];
 
     // public function searchableAs(): string

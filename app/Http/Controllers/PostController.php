@@ -83,6 +83,8 @@ class PostController extends Controller
                 'unit3' => $request->unit3,
                 'sold_status' => $request->sold_status,
                 'status_id' => $request->status_id,
+                'gop' => $request->gop,
+                'pay' => $request->pay,
                 'priority_status' => $request->priority_status ?? "",
                 'updated_at' => date('Y-m-d H:i:s'),
                 'user_id' => $request->user_id
@@ -434,6 +436,8 @@ class PostController extends Controller
                 'unit3' => $request->unit3,
                 'sold_status' => $request->sold_status,
                 'status_id' => $request->status_id,
+                'gop' => $request->gop,
+                'pay' => $request->pay,
                 'priority_status' => $request->priority_status,
                 'updated_at' => date('Y-m-d H:i:s'),
             ]
