@@ -365,6 +365,7 @@ class PostController extends Controller
             'postImage'
         ])
             ->where('user_id', $id)
+            ->where('status_id', 4)
             ->orderBy('created_at', 'desc')
             ->get();
 
