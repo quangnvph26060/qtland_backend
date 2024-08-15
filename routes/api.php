@@ -82,11 +82,15 @@ Route::group(['prefix' => 'posts'], function () {
     Route::get('/filter', [PostController::class, 'filter']);
     Route::get('/user/{id}', [PostController::class, 'getPostByUser']);
     Route::get('/user-status/{id}', [PostController::class, 'getPostStatusByUser']);
+    Route::get('/user-status2/{id}', [PostController::class, 'getPostStatus2ByUser']);
+    Route::get('/user-status3/{id}', [PostController::class, 'getPostStatus3ByUser']);
+    Route::get('/user-sold/{id}', [PostController::class, 'getPostSoldByUser']);
     Route::get('/{id}', [PostController::class, 'show']);
     Route::get('/postbyid/{id}', [PostController::class, 'showpostByid']);
     Route::post('', [PostController::class, 'store']);
     Route::put('/{id}', [PostController::class, 'update']);
     Route::patch('/{id}', [PostController::class, 'updateStatus']);
+    Route::patch('/status2/{id}', [PostController::class, 'updateStatus2']);
     Route::delete('/{id}', [PostController::class, 'destroy']);
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
     Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
