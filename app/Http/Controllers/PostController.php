@@ -22,7 +22,7 @@ class PostController extends Controller
     public function index(Request $request)
     {
         //
-        $posts = Post::with(['user', 'status', 'postImage'])->orderBy('created_at', 'DESC');
+        $posts = Post::where('status_id', 4)->with(['user', 'status', 'postImage'])->orderBy('created_at', 'DESC');
 
         if ($request->address) {
 
@@ -240,7 +240,7 @@ class PostController extends Controller
             $postsQuery = Post::with(['status:id,name', 'postImage'])
                 ->withCount('views')
                 ->when(!$request->filled('address'), function ($query) {
-                    $query->where('status_id', '!=', 3);
+                    $query->where('status_id', 4);
                 })
                 ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
                     $query->where('priority_status', $priority);
@@ -365,7 +365,6 @@ class PostController extends Controller
             'postImage'
         ])
             ->where('user_id', $id)
-            ->where('status_id', 4)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -381,6 +380,54 @@ class PostController extends Controller
         ])
             ->where('user_id', $id)
             ->where('status_id', 4)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($posts, 200);
+    }
+
+    public function getPostStatus3ByUser($id)
+    {
+        $posts = Post::with([
+            'user' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'postImage'
+        ])
+            ->where('user_id', $id)
+            ->where('status_id', 3)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($posts, 200);
+    }
+
+    public function getPostStatus2ByUser($id)
+    {
+        $posts = Post::with([
+            'user' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'postImage'
+        ])
+            ->where('user_id', $id)
+            ->where('status_id', 2)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            Log::info($posts);
+
+        return response()->json($posts, 200);
+    }
+
+    public function getPostSoldByUser($id){
+        $posts = Post::with([
+            'user' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'postImage'
+        ])
+            ->where('user_id', $id)
+            ->where('sold_status', 1)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -482,6 +529,30 @@ class PostController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
         }
+
+        Redis::del('posts:pending');
+        Redis::del('posts:not-pending');
+        return response()->json(['message' => 'Cập nhật thành công'], 200);
+    }
+
+    public function updateStatus2($id)
+    {
+        $post = Post::find($id);
+        $post->status_id = 2;
+        $post->update(
+            [
+                'status_id' => $post->status_id,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        );
+        if (Redis::exists('post:' . $id)) {
+            Redis::hset('post:' . $post->id, [
+                'status_id' => $post->status_id,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        Log::info($post);
 
         Redis::del('posts:pending');
         Redis::del('posts:not-pending');
