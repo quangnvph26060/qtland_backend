@@ -19,16 +19,23 @@ class UserController extends Controller
      * @return $users
      * CreatedBy: youngbachhh (31/03/2024)
      */
-    public function index()
+    public function index(Request $request)
     {
-        return User::withCount('post')->get();
+        // return User::withCount('post')->get();
+        $pageSize = $request->input('pageSize', 10);
+        $users = User::withCount('post')->paginate($pageSize);
+        return response()->json($users);
     }
 
-    public function userrole()
+    public function userrole(Request $request)
     {
-        return User::withCount('post')
-        ->whereNotIn('role_id', [1, 6])
-        ->get();
+
+        // return User::withCount('post')
+        // ->whereNotIn('role_id', [1, 6])
+        // ->get();
+        $pageSize = $request->input('pageSize', 10);
+        $users = User::withCount('post')->whereNotIn('role_id', [1, 6])->paginate($pageSize);
+        return response()->json($users);
     }
 
     /**
