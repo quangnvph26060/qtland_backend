@@ -11,9 +11,10 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $client = Client::get();
+        $pageSize = $request->input('pageSize', 10);
+        $client = Client::paginate($pageSize);
         return response()->json($client);
     }
 

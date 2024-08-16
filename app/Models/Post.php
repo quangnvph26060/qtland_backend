@@ -59,6 +59,7 @@ class Post extends Model
         'user_id',
         'gop',
         'pay',
+        'traphong'
     ];
 
     // public function searchableAs(): string
