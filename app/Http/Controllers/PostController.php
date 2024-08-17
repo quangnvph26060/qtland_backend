@@ -353,6 +353,8 @@ class PostController extends Controller
         }
     }
 
+
+
     public function filtersold(Request $request)
     {
         $page = $request->input('page', 1);
@@ -417,6 +419,72 @@ class PostController extends Controller
             return response()->json($posts, 200);
         }
     }
+
+    public function filtersoldByUser($id, Request $request)
+    {
+        $page = $request->input('page', 1);
+        $pageSize = $request->input('pageSize', 10);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions', []);
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'posts:' . md5(serialize($request->all()));
+
+        $cachedPosts = Redis::get($cacheKey);
+
+        if ($cachedPosts) {
+            return response()->json(json_decode($cachedPosts), 200);
+        } else {
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
+                ->withCount('views')->where('sold_status', 0)
+                ->when(!$request->filled('address'), function ($query) {
+                    $query->where('status_id', 4);
+                })
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
+                    $query->where('priority_status', $priority);
+                })
+                ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
+
+                    $query->where(function ($query) use ($searchConditions) {
+                        foreach ($searchConditions as $condition) {
+                            $column = $condition['column'];
+                            $text = $condition['text'];
+
+                            if ($column === 'name') {
+                                $query->orWhereHas('user', function ($query) use ($text) {
+                                    $query->where('name', 'LIKE', '%' . $text . '%');
+                                });
+                            } elseif (in_array($column, [
+                                "title",
+                                "address",
+                                "address_detail",
+                            ])) {
+                                $query->Where($column, 'LIKE', '%' . $text . '%');
+                            }
+                        }
+                    });
+                })->where('user_id', $id)
+                ->orderBy('created_at', 'desc');
+
+            // Address search
+            if ($request->filled('address')) {
+                $postsQuery = $this->applyAddressFilter($postsQuery, $request->address);
+            }
+
+
+            // Log::info($request->all());
+            // Apply filters
+            $postsQuery = $this->applyFilters($postsQuery, $request);
+
+            // Apply pagination
+            $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
+            // Cache the result for 10 minutes
+            Redis::setex($cacheKey, 600, $posts->toJson());
+
+            return response()->json($posts, 200);
+        }
+    }
+
 
 
 
@@ -729,6 +797,7 @@ class PostController extends Controller
         $post->update(
             [
                 'sold_status' => $request->sold_status,
+                'status_id' => $request->status_id,
                 'updated_at' => date('Y-m-d H:i:s'),
             ]
         );
