@@ -484,6 +484,11 @@ class PostController extends Controller
             return response()->json($posts, 200);
         }
     }
+    public function postsoldbyuser($id, Request $request){
+        $pageSize = $request->input('pageSize', 10);
+        $users = Post::where('user_id', $id)->paginate($pageSize);
+        return response()->json($users);
+    }
 
 
 
