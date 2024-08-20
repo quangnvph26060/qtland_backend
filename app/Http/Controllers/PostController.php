@@ -821,6 +821,19 @@ class PostController extends Controller
         return response()->json($post, 200);
     }
 
+    public function updatepending($id, Request $request){
+        $post = Post::find($id);
+        Log::info($request->note);
+        $post->update(
+            [
+                'status_id' => $request->status_id,
+                'note' => $request->note,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        );
+        return response()->json($post, 200);
+    }
+
     public function updatesoldstatus($id,Request $request)
     {
         $post = Post::find($id);
@@ -828,6 +841,7 @@ class PostController extends Controller
             $post->update(
                 [
                     'sold_status' => $request->sold_status,
+                    'status_id' => $request->status_id,
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]
             );
