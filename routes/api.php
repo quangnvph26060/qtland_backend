@@ -52,6 +52,7 @@ Route::group(['prefix' => 'auth'], function () {
 // Route for users
 Route::group(['prefix' => 'users'], function () {
     Route::get('', [UserController::class, 'index']);
+    Route::get('/user-role/role', [UserController::class, 'userrole']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::get('/{id}/name', [UserController::class, 'getName']);
     Route::post('', [UserController::class, 'store']);
@@ -61,6 +62,7 @@ Route::group(['prefix' => 'users'], function () {
 });
 
 Route::post('/send-email', [EmailController::class, 'sendEmail']);
+Route::post('/send-email-password', [EmailController::class, 'sendEmailPassword']);
 
 Route::group(['prefix' => 'report'], function () {
     Route::get('', [ReportClientController::class, 'index']);
@@ -78,24 +80,36 @@ Route::group(['prefix' => 'report'], function () {
 Route::group(['prefix' => 'posts'], function () {
     Route::get('', [PostController::class, 'index']);
     Route::get('/filter', [PostController::class, 'filter']);
+    Route::get('/filter/user/{id}', [PostController::class, 'filterByUser']);
+    Route::get('/filtersold', [PostController::class, 'filtersold']);
+    Route::get('/filterSoldUser/user/{id}', [PostController::class, 'filtersoldByUser']);
+    Route::get('/postsold/user/{id}', [PostController::class, 'postsoldbyuser']);
     Route::get('/user/{id}', [PostController::class, 'getPostByUser']);
+    Route::get('/user-status/{id}', [PostController::class, 'getPostStatusByUser']);
+    Route::get('/user-status2/{id}', [PostController::class, 'getPostStatus2ByUser']);
+    Route::get('/user-status3/{id}', [PostController::class, 'getPostStatus3ByUser']);
+    Route::get('/user-sold/{id}', [PostController::class, 'getPostSoldByUser']);
     Route::get('/{id}', [PostController::class, 'show']);
     Route::get('/postbyid/{id}', [PostController::class, 'showpostByid']);
     Route::post('', [PostController::class, 'store']);
     Route::put('/{id}', [PostController::class, 'update']);
     Route::patch('/{id}', [PostController::class, 'updateStatus']);
+    Route::patch('/status2/{id}', [PostController::class, 'updateStatus2']);
     Route::delete('/{id}', [PostController::class, 'destroy']);
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
     Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
+    Route::post('/soldstatus/{id}', [PostController::class, 'updatesoldstatus']);
     Route::post('/avater/update-avatar', [UserController::class, 'updateAvatar']);
-   
+
 });
 Route::group(['prefix' => 'client'], function(){
     Route::get('', [ClientController::class, 'index']);
+    Route::get('/user/{id}', [ClientController::class, 'clientByUser']);
     Route::get('/{id}', [ClientController::class, 'show']);
     Route::post('/{id}', [ClientController::class, 'update']);
     Route::delete('/{id}', [ClientController::class, 'destroy']);
     Route::get('/export/client', [ClientController::class, 'export']);
+    Route::post('', [ClientController::class, 'store']);
 });
 
 Route::group(['prefix' => 'config'], function(){

@@ -19,9 +19,23 @@ class UserController extends Controller
      * @return $users
      * CreatedBy: youngbachhh (31/03/2024)
      */
-    public function index()
+    public function index(Request $request)
     {
-        return User::withCount('post')->get();
+        // return User::withCount('post')->get();
+        $pageSize = $request->input('pageSize', 10);
+        $users = User::withCount('post')->paginate($pageSize);
+        return response()->json($users);
+    }
+
+    public function userrole(Request $request)
+    {
+
+        // return User::withCount('post')
+        // ->whereNotIn('role_id', [1, 6])
+        // ->get();
+        $pageSize = $request->input('pageSize', 10);
+        $users = User::withCount('post')->whereNotIn('role_id', [1, 6])->paginate($pageSize);
+        return response()->json($users);
     }
 
     /**
@@ -182,13 +196,13 @@ class UserController extends Controller
         return response()->json($user, 200);
     }
     public function changePassWord(Request $request){
-         
+
         //   $request->validate([
         //     'current_password' => 'required',
         //     'new_password' => 'required|min:8|confirmed',
         // ]);
 
-        
+
         $user = User::find($request->id);
         Log::info($user);
         if (!Hash::check($request->current_password, $user->password)) {

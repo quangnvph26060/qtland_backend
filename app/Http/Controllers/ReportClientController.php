@@ -10,9 +10,11 @@ use SebastianBergmann\CodeCoverage\Report\Xml\Report;
 
 class ReportClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reports = ReportClient::orderBy('created_at', 'desc') ->get();
+        $pageSize = $request->input('pageSize', 10);
+
+        $reports = ReportClient::paginate($pageSize);
 
         return response()->json($reports, 200);
     }
