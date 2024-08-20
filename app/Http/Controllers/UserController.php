@@ -103,6 +103,7 @@ class UserController extends Controller
                 'access_permission_2' =>$request['access_permission_2'],
                 'access_permission_3' =>$request['access_permission_3'],
                 'access_permission_4' =>$request['access_permission_4'],
+                'access_permission_5' =>$request['access_permission_5'],
             ]
         );
         return response()->json(['message' => 'Thêm mới thành công'], 201);
@@ -187,6 +188,7 @@ class UserController extends Controller
                 'access_permission_2' => $request->access_permission_2,
                 'access_permission_3' => $request->access_permission_3,
                 'access_permission_4' => $request->access_permission_4,
+                'access_permission_5' => $request->access_permission_5,
             ]
         );
         return response()->json(['message' => 'Cập nhật thành công'], 200);

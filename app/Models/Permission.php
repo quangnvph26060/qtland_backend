@@ -16,5 +16,6 @@ class Permission extends Model
         'access_permission_2',
         'access_permission_3',
         'access_permission_4',
+        'access_permission_5',
     ];
 }

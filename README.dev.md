@@ -3,3 +3,8 @@ composer require phpoffice/phpspreadsheet
 
 --20/8/
 php artisan migrate --path=/database/migrations/2024_08_20_110834_create_permissions_table.php
+
+
+
+ALTER TABLE permissions
+ADD access_permission_5 VARCHAR(5);

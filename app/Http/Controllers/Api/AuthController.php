@@ -23,7 +23,8 @@ class AuthController extends Controller
         if (!$success) {
             return response()->json(['message' => 'Thông tin đăng nhập không đúng!'], 401);
         }
-        $user = User::where('email', $request->email)->first();
+        // kiểm tra user còn quyền vào tài khoản không ->where('is_active', 1)
+        $user = User::where('email', $request->email)->where('is_active', 1)->first();
 
         $token = $user->createToken($request->email);
 
