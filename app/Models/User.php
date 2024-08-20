@@ -59,4 +59,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class, 'user_id', 'id');
     }
+    protected $appends = ['permissions'];
+
+    public function permissions()
+    {
+        return $this->hasMany(Permission::class, 'user_id', 'id');
+    }
+
+    public function getPermissionsAttribute()
+    {
+        return $this->permissions()->get();
+    }
 }
