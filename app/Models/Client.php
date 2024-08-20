@@ -27,5 +27,13 @@ class Client extends Model
         'numbermotor',
         'note',
         'birth_year',
+        'user_id'
     ];
+
+    protected $appends = ['user'];
+
+    public function getUserAttribute()
+    {
+        return User::where('id', $this->attributes['user_id'])->first();
+    }
 }

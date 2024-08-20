@@ -820,4 +820,27 @@ class PostController extends Controller
         );
         return response()->json($post, 200);
     }
+
+    public function updatesoldstatus($id,Request $request)
+    {
+        $post = Post::find($id);
+        if($request->sold_status == 1){
+            $post->update(
+                [
+                    'sold_status' => $request->sold_status,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]
+            );
+        }else{
+            $post->update(
+                [
+                    'sold_status' => $request->sold_status,
+                    'status_id' => 3,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]
+            );
+        }
+
+        return response()->json($post, 200);
+    }
 }
