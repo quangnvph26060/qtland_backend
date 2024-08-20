@@ -98,15 +98,18 @@ Route::group(['prefix' => 'posts'], function () {
     Route::delete('/{id}', [PostController::class, 'destroy']);
     Route::get('/user/{id}/count', [PostController::class, 'totalPostByUser']);
     Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
+    Route::post('/soldstatus/{id}', [PostController::class, 'updatesoldstatus']);
     Route::post('/avater/update-avatar', [UserController::class, 'updateAvatar']);
 
 });
 Route::group(['prefix' => 'client'], function(){
     Route::get('', [ClientController::class, 'index']);
+    Route::get('/user/{id}', [ClientController::class, 'clientByUser']);
     Route::get('/{id}', [ClientController::class, 'show']);
     Route::post('/{id}', [ClientController::class, 'update']);
     Route::delete('/{id}', [ClientController::class, 'destroy']);
     Route::get('/export/client', [ClientController::class, 'export']);
+    Route::post('', [ClientController::class, 'store']);
 });
 
 Route::group(['prefix' => 'config'], function(){

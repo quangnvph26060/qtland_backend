@@ -18,6 +18,12 @@ class ClientController extends Controller
         return response()->json($client);
     }
 
+    public function clientByUser($id, Request $request){
+        $pageSize = $request->input('pageSize', 10);
+        $client = Client::where('user_id', $id)->paginate($pageSize);
+        return response()->json($client);
+    }
+
     public function destroy($id)
     {
 
@@ -95,5 +101,34 @@ class ClientController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
         ]);
+    }
+
+    public function store(Request $request)
+    {
+
+
+        $client = Client::create(
+            [
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'cccd' => $request->cccd,
+                'address' => $request->address,
+                'email' => $request->email,
+                'finance' => $request->finance,
+                'searcharea' => $request->searcharea,
+                'area' => $request->area,
+                'intendtime' => $request->intendtime,
+                'business' => $request->business,
+                'personnumber' => $request->personnumber,
+                'numbercars' => $request->numbercars,
+                'numbermotor' => $request->numbermotor,
+                'note' => $request->note,
+                'birth_year' => $request->birth_year,
+                'user_id' => $request->user_id,
+            ]
+        );
+
+
+        return response()->json($client, 200);
     }
 }
