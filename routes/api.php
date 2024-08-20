@@ -100,6 +100,7 @@ Route::group(['prefix' => 'posts'], function () {
     Route::post('/sold_status/{id}', [PostController::class, 'updateSold']);
     Route::post('/soldstatus/{id}', [PostController::class, 'updatesoldstatus']);
     Route::post('/avater/update-avatar', [UserController::class, 'updateAvatar']);
+    Route::post('/pending/{id}', [PostController::class, 'updatepending']);
 
 });
 Route::group(['prefix' => 'client'], function(){
