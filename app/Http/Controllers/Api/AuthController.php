@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
 class AuthController extends Controller
 {
     /**
@@ -24,8 +23,6 @@ class AuthController extends Controller
         if (!$success) {
             return response()->json(['message' => 'Thông tin đăng nhập không đúng!'], 401);
         }
-
-
         $user = User::where('email', $request->email)->first();
 
         $token = $user->createToken($request->email);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -91,7 +92,19 @@ class UserController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
             ]
         );
-
+        if(!$user){
+            return response()->json(['message' => 'Thêm mới thành công'], 201);
+        }
+        Permission::create(
+            [
+                'user_id' => $user->id,
+                'role_id' => $user->role_id,
+                'access_permission_1' =>$request['access_permission_1'],
+                'access_permission_2' =>$request['access_permission_2'],
+                'access_permission_3' =>$request['access_permission_3'],
+                'access_permission_4' =>$request['access_permission_4'],
+            ]
+        );
         return response()->json(['message' => 'Thêm mới thành công'], 201);
     }
 
@@ -149,7 +162,7 @@ class UserController extends Controller
 
         $user = User::find($id);
 
-        $user->update([
+        $result =    $user->update([
             "name" => $request->name,
             "email" => $request->email,
             "password" => (empty($request->password) ? $user->password : Hash::make($request->password)),
@@ -162,7 +175,20 @@ class UserController extends Controller
             'birthday' => $request->birthday,
             "updated_at" => date('Y-m-d H:i:s'),
         ]);
-
+        if(!$result){
+            return response()->json(['message' => 'Cập nhật user không thành công '],401);
+        }
+        $permission = Permission::where('user_id', $id)->first();
+        $permission->update(
+            [
+                'user_id' => $user->id,
+                'role_id' => $user->role_id,
+                'access_permission_1' => $request->access_permission_1,
+                'access_permission_2' => $request->access_permission_2,
+                'access_permission_3' => $request->access_permission_3,
+                'access_permission_4' => $request->access_permission_4,
+            ]
+        );
         return response()->json(['message' => 'Cập nhật thành công'], 200);
     }
 

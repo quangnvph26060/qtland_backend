@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\CommentImage;
+use App\Models\Permission;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +16,11 @@ use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
+    protected $userinfo;
+    public function __construct(AuthController $userinfo)
+    {
+        $this->userinfo = $userinfo;
+    }
     /**
      * HÃ m láº¥y danh sÃ¡ch toÃ n bá»™ bÃ i viáº¿t
      * @param
@@ -353,9 +361,20 @@ class PostController extends Controller
     }
 
 
-
+// 123
     public function filtersold(Request $request)
     {
+
+        $permission = Permission::where('user_id',$request->id)->first();
+        
+        $dataPermission[] = $permission['access_permission_1'];
+        $data = json_decode($permission, true);
+        $accessPermissionsArray = array_map(function($key) use ($data) {
+            return $data[$key];
+        }, array_filter(array_keys($data), function($key) {
+            return strpos($key, 'access_permission_') === 0;
+        }));
+
         $page = $request->input('page', 1);
         $pageSize = $request->input('pageSize', 10);
         $priority = $request->input('priority_status', 'all');
@@ -365,7 +384,6 @@ class PostController extends Controller
         $cacheKey = 'posts:' . md5(serialize($request->all()));
 
         $cachedPosts = Redis::get($cacheKey);
-
         // if (!$cachedPosts) {
         //     return response()->json(json_decode($cachedPosts), 200);
         // } else {
@@ -398,6 +416,7 @@ class PostController extends Controller
                     }
                 });
             })
+            ->wherein('classrank',$accessPermissionsArray)
             ->orderBy('updated_at', 'desc');
 
         // Address search
@@ -821,6 +840,19 @@ class PostController extends Controller
         return response()->json($post, 200);
     }
 
+    public function updatepending($id, Request $request){
+        $post = Post::find($id);
+        Log::info($request->note);
+        $post->update(
+            [
+                'status_id' => $request->status_id,
+                'note' => $request->note,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        );
+        return response()->json($post, 200);
+    }
+
     public function updatesoldstatus($id,Request $request)
     {
         $post = Post::find($id);
@@ -828,6 +860,7 @@ class PostController extends Controller
             $post->update(
                 [
                     'sold_status' => $request->sold_status,
+                    'status_id' => $request->status_id,
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]
             );
