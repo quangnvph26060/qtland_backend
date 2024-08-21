@@ -242,9 +242,7 @@ class PostController extends Controller
 
         $cachedPosts = Redis::get($cacheKey);
 
-        if ($cachedPosts) {
-            return response()->json(json_decode($cachedPosts), 200);
-        } else {
+
             $postsQuery = Post::with(['status:id,name', 'postImage'])
                 ->withCount('views')
                 ->when(!$request->filled('address'), function ($query) {
@@ -292,7 +290,66 @@ class PostController extends Controller
             Redis::setex($cacheKey, 600, $posts->toJson());
 
             return response()->json($posts, 200);
-        }
+
+    }
+    public function filteradminbyUser($id, Request $request)
+    {
+        $page = $request->input('page', 1);
+        $pageSize = $request->input('pageSize', 10);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions', []);
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'posts:' . md5(serialize($request->all()));
+
+        $cachedPosts = Redis::get($cacheKey);
+
+
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
+                ->withCount('views')->where('user_id', $id)
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
+                    $query->where('priority_status', $priority);
+                })
+                ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
+
+                    $query->where(function ($query) use ($searchConditions) {
+                        foreach ($searchConditions as $condition) {
+                            $column = $condition['column'];
+                            $text = $condition['text'];
+
+                            if ($column === 'name') {
+                                $query->orWhereHas('user', function ($query) use ($text) {
+                                    $query->where('name', 'LIKE', '%' . $text . '%');
+                                });
+                            } elseif (in_array($column, [
+                                "title",
+                                "address",
+                                "address_detail",
+                            ])) {
+                                $query->Where($column, 'LIKE', '%' . $text . '%');
+                            }
+                        }
+                    });
+                })
+                ->orderBy('updated_at', 'desc');
+
+            // Address search
+            if ($request->filled('address')) {
+                $postsQuery = $this->applyAddressFilter($postsQuery, $request->address);
+            }
+
+
+            // Log::info($request->all());
+            // Apply filters
+            $postsQuery = $this->applyFilters($postsQuery, $request);
+
+            // Apply pagination
+            $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
+            // Cache the result for 10 minutes
+            Redis::setex($cacheKey, 600, $posts->toJson());
+
+            return response()->json($posts, 200);
+
     }
 
     public function filterByUser($id, Request $request)
