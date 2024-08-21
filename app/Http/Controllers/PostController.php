@@ -361,12 +361,13 @@ class PostController extends Controller
     }
 
 
+
 // 123
     public function filtersold(Request $request)
     {
 
         $permission = Permission::where('user_id',$request->id)->first();
-        
+
         $dataPermission[] = $permission['access_permission_1'];
         $data = json_decode($permission, true);
         $accessPermissionsArray = array_map(function($key) use ($data) {
