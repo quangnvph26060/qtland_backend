@@ -80,6 +80,7 @@ Route::group(['prefix' => 'report'], function () {
 Route::group(['prefix' => 'posts'], function () {
     Route::get('', [PostController::class, 'index']);
     Route::get('/filter', [PostController::class, 'filter']);
+    Route::get('/filter/admin/user/{id}', [PostController::class, 'filteradminbyUser']);
     Route::get('/filter/user/{id}', [PostController::class, 'filterByUser']);
     Route::get('/filtersold', [PostController::class, 'filtersold']);
     Route::get('/filterSoldUser/user/{id}', [PostController::class, 'filtersoldByUser']);
