@@ -169,28 +169,9 @@ class PostController extends Controller
      */
     public function pending()
     {
-        // $posts = Redis::get('posts:pending');
-
-        // if ($posts === null) {
-        //     $posts = Post::with(['user' => function ($query) {
-        //         $query->select('id', 'name');
-        //     }, 'status' => function ($query) {
-        //         $query->select('id', 'name');
-        //     }, 'postImage'])->where('status_id', 3)
-        //         ->orderBy('created_at', 'desc')
-        //         ->get();
-
-        //     Redis::set('posts:pending', json_encode($posts));
-        //     Redis::expire('posts:pending', 3600);
-        // } else {
-        //     $posts = json_decode($posts);
-        // }
 
         // return response()->json($posts, 200);
-        $posts = Post::with(['user', 'status', 'postImage'])->where('status_id', 3)->orderBy('created_at', 'DESC');
-        // if($request->address){
-        //     $posts->where('address', $request->address);
-        // }
+        $posts = Post::with(['user', 'status', 'postImage'])->where('status_id', 3)->orderBy('updated_at', 'DESC');
         $posts = $posts->get();
         return response()->json($posts);
     }
@@ -212,7 +193,7 @@ class PostController extends Controller
                 $query->select('id', 'name');
             }, 'postImage'])
                 ->where('status_id', '!=', 3)
-                ->orderBy('created_at', 'desc')
+                ->orderBy('updated_at', 'desc')
                 ->get();
 
             Redis::set('posts:not-pending', json_encode($posts));
@@ -307,6 +288,245 @@ class PostController extends Controller
 
             $postsQuery = Post::with(['status:id,name', 'postImage'])
                 ->withCount('views')->where('user_id', $id)
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
+                    $query->where('priority_status', $priority);
+                })
+                ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
+
+                    $query->where(function ($query) use ($searchConditions) {
+                        foreach ($searchConditions as $condition) {
+                            $column = $condition['column'];
+                            $text = $condition['text'];
+
+                            if ($column === 'name') {
+                                $query->orWhereHas('user', function ($query) use ($text) {
+                                    $query->where('name', 'LIKE', '%' . $text . '%');
+                                });
+                            } elseif (in_array($column, [
+                                "title",
+                                "address",
+                                "address_detail",
+                            ])) {
+                                $query->Where($column, 'LIKE', '%' . $text . '%');
+                            }
+                        }
+                    });
+                })
+                ->orderBy('updated_at', 'desc');
+
+            // Address search
+            if ($request->filled('address')) {
+                $postsQuery = $this->applyAddressFilter($postsQuery, $request->address);
+            }
+
+
+            // Log::info($request->all());
+            // Apply filters
+            $postsQuery = $this->applyFilters($postsQuery, $request);
+
+            // Apply pagination
+            $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
+            // Cache the result for 10 minutes
+            Redis::setex($cacheKey, 600, $posts->toJson());
+
+            return response()->json($posts, 200);
+
+    }
+    public function filteradminbyUserStatus4($id, Request $request)
+    {
+        $page = $request->input('page', 1);
+        $pageSize = $request->input('pageSize', 10);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions', []);
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'posts:' . md5(serialize($request->all()));
+
+        $cachedPosts = Redis::get($cacheKey);
+
+
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
+                ->withCount('views')->where('user_id', $id)->where('status_id', 4)->where('sold_status', 0)
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
+                    $query->where('priority_status', $priority);
+                })
+                ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
+
+                    $query->where(function ($query) use ($searchConditions) {
+                        foreach ($searchConditions as $condition) {
+                            $column = $condition['column'];
+                            $text = $condition['text'];
+
+                            if ($column === 'name') {
+                                $query->orWhereHas('user', function ($query) use ($text) {
+                                    $query->where('name', 'LIKE', '%' . $text . '%');
+                                });
+                            } elseif (in_array($column, [
+                                "title",
+                                "address",
+                                "address_detail",
+                            ])) {
+                                $query->Where($column, 'LIKE', '%' . $text . '%');
+                            }
+                        }
+                    });
+                })
+                ->orderBy('updated_at', 'desc');
+
+            // Address search
+            if ($request->filled('address')) {
+                $postsQuery = $this->applyAddressFilter($postsQuery, $request->address);
+            }
+
+
+            // Log::info($request->all());
+            // Apply filters
+            $postsQuery = $this->applyFilters($postsQuery, $request);
+
+            // Apply pagination
+            $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
+            // Cache the result for 10 minutes
+            Redis::setex($cacheKey, 600, $posts->toJson());
+
+            return response()->json($posts, 200);
+
+    }
+
+    public function filteradminbyUserSold($id, Request $request)
+    {
+        $page = $request->input('page', 1);
+        $pageSize = $request->input('pageSize', 10);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions', []);
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'posts:' . md5(serialize($request->all()));
+
+        $cachedPosts = Redis::get($cacheKey);
+
+
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
+                ->withCount('views')->where('user_id', $id)->where('sold_status', 1)
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
+                    $query->where('priority_status', $priority);
+                })
+                ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
+
+                    $query->where(function ($query) use ($searchConditions) {
+                        foreach ($searchConditions as $condition) {
+                            $column = $condition['column'];
+                            $text = $condition['text'];
+
+                            if ($column === 'name') {
+                                $query->orWhereHas('user', function ($query) use ($text) {
+                                    $query->where('name', 'LIKE', '%' . $text . '%');
+                                });
+                            } elseif (in_array($column, [
+                                "title",
+                                "address",
+                                "address_detail",
+                            ])) {
+                                $query->Where($column, 'LIKE', '%' . $text . '%');
+                            }
+                        }
+                    });
+                })
+                ->orderBy('updated_at', 'desc');
+
+            // Address search
+            if ($request->filled('address')) {
+                $postsQuery = $this->applyAddressFilter($postsQuery, $request->address);
+            }
+
+
+            // Log::info($request->all());
+            // Apply filters
+            $postsQuery = $this->applyFilters($postsQuery, $request);
+
+            // Apply pagination
+            $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
+            // Cache the result for 10 minutes
+            Redis::setex($cacheKey, 600, $posts->toJson());
+
+            return response()->json($posts, 200);
+
+    }
+
+    public function filteradminbyUserStatus3($id, Request $request)
+    {
+        $page = $request->input('page', 1);
+        $pageSize = $request->input('pageSize', 10);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions', []);
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'posts:' . md5(serialize($request->all()));
+
+        $cachedPosts = Redis::get($cacheKey);
+
+
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
+                ->withCount('views')->where('user_id', $id)->where('status_id', 3)->where('sold_status', '!=', 1)
+                ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
+                    $query->where('priority_status', $priority);
+                })
+                ->when(!empty($searchConditions), function ($query) use ($searchConditions) {
+
+                    $query->where(function ($query) use ($searchConditions) {
+                        foreach ($searchConditions as $condition) {
+                            $column = $condition['column'];
+                            $text = $condition['text'];
+
+                            if ($column === 'name') {
+                                $query->orWhereHas('user', function ($query) use ($text) {
+                                    $query->where('name', 'LIKE', '%' . $text . '%');
+                                });
+                            } elseif (in_array($column, [
+                                "title",
+                                "address",
+                                "address_detail",
+                            ])) {
+                                $query->Where($column, 'LIKE', '%' . $text . '%');
+                            }
+                        }
+                    });
+                })
+                ->orderBy('updated_at', 'desc');
+
+            // Address search
+            if ($request->filled('address')) {
+                $postsQuery = $this->applyAddressFilter($postsQuery, $request->address);
+            }
+
+
+            // Log::info($request->all());
+            // Apply filters
+            $postsQuery = $this->applyFilters($postsQuery, $request);
+
+            // Apply pagination
+            $posts = $postsQuery->paginate($pageSize, ['*'], 'page', $page);
+            // Cache the result for 10 minutes
+            Redis::setex($cacheKey, 600, $posts->toJson());
+
+            return response()->json($posts, 200);
+
+    }
+
+    public function filteradminbyUserStatus2($id, Request $request)
+    {
+        $page = $request->input('page', 1);
+        $pageSize = $request->input('pageSize', 10);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions', []);
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'posts:' . md5(serialize($request->all()));
+
+        $cachedPosts = Redis::get($cacheKey);
+
+
+            $postsQuery = Post::with(['status:id,name', 'postImage'])
+                ->withCount('views')->where('user_id', $id)->where('status_id', 2)
                 ->when($request->filled('priority_status') && $priority !== 'all', function ($query) use ($priority) {
                     $query->where('priority_status', $priority);
                 })
@@ -564,7 +784,7 @@ class PostController extends Controller
     public function postsoldbyuser($id, Request $request)
     {
         $pageSize = $request->input('pageSize', 10);
-        $users = Post::where('user_id', $id)->paginate($pageSize);
+        $users = Post::where('user_id', $id)->orderBy('updated_at', 'desc')->paginate($pageSize);
         return response()->json($users);
     }
 
@@ -657,7 +877,7 @@ class PostController extends Controller
             'postImage'
         ])
             ->where('user_id', $id)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return response()->json($posts, 200);
@@ -672,7 +892,7 @@ class PostController extends Controller
         ])
             ->where('user_id', $id)
             ->where('status_id', 4)->where('sold_status', 0)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return response()->json($posts, 200);
@@ -688,7 +908,7 @@ class PostController extends Controller
         ])
             ->where('user_id', $id)
             ->where('status_id', 3)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return response()->json($posts, 200);
@@ -704,7 +924,7 @@ class PostController extends Controller
         ])
             ->where('user_id', $id)
             ->where('status_id', 2)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
         Log::info($posts);
 
@@ -721,7 +941,7 @@ class PostController extends Controller
         ])
             ->where('user_id', $id)
             ->where('sold_status', 1)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return response()->json($posts, 200);
