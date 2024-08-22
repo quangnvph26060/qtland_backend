@@ -14,13 +14,13 @@ class ClientController extends Controller
     public function index(Request $request)
     {
         $pageSize = $request->input('pageSize', 10);
-        $client = Client::paginate($pageSize);
+        $client = Client::orderBy('updated_at', 'desc')->paginate($pageSize);
         return response()->json($client);
     }
 
     public function clientByUser($id, Request $request){
         $pageSize = $request->input('pageSize', 10);
-        $client = Client::where('user_id', $id)->paginate($pageSize);
+        $client = Client::where('user_id', $id)->orderBy('updated_at', 'desc')->paginate($pageSize);
         return response()->json($client);
     }
 
