@@ -18,11 +18,11 @@ class ReportClientController extends Controller
 
         return response()->json($reports, 200);
     }
-    public function getReportByUser($id)
+    public function getReportByUser($id, Request $request)
     {
-        $reports = ReportClient::where('user_id', $id)
-            ->orderBy('updated_id', 'desc')
-            ->get();
+        $pageSize = $request->input('pageSize', 10);
+
+        $reports = ReportClient::orderBy('updated_at', 'desc')->where('user_id', $id)->paginate($pageSize);
 
         return response()->json($reports, 200);
     }
