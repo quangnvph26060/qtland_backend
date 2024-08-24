@@ -90,6 +90,7 @@ Route::group(['prefix' => 'posts'], function () {
     Route::get('/filterSoldUser/user/{id}', [PostController::class, 'filtersoldByUser']);
     Route::get('/postsold/user/{id}', [PostController::class, 'postsoldbyuser']);
     Route::get('/user/{id}', [PostController::class, 'getPostByUser']);
+    Route::get('/userht/{id}', [PostController::class, 'getPostByUserHT']);
     Route::get('/user-status/{id}', [PostController::class, 'getPostStatusByUser']);
     Route::get('/user-status2/{id}', [PostController::class, 'getPostStatus2ByUser']);
     Route::get('/user-status3/{id}', [PostController::class, 'getPostStatus3ByUser']);

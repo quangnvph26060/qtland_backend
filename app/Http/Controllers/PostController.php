@@ -882,6 +882,21 @@ class PostController extends Controller
 
         return response()->json($posts, 200);
     }
+
+    public function getPostByUserHT($id)
+    {
+        $posts = Post::with([
+            'user' => function ($query) {
+                $query->select('id', 'name');
+            },
+            'postImage'
+        ])
+            ->where('user_id', $id)->where('status_id', '4')-> where('sold_status', '!=' , 1)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return response()->json($posts, 200);
+    }
     public function getPostStatusByUser($id)
     {
         $posts = Post::with([

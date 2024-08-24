@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+
 class AuthController extends Controller
 {
     /**
@@ -15,24 +16,51 @@ class AuthController extends Controller
      * @return $user
      * CreatedBy: youngbachhh (31/03/2024)
      */
+    // public function login(Request $request)
+    // {
+
+    //     $success = Auth::attempt($request->only('email', 'password'));
+
+    //     if (!$success) {
+    //         return response()->json(['message' => 'Thông tin đăng nhập không đúng!'], 401);
+    //     }
+    //     // kiểm tra user còn quyền vào tài khoản không ->where('is_active', 1)
+    //     $user = User::where('email', $request->email)->where('is_active', 1)->first();
+
+    //     $token = $user->createToken($request->email);
+
+    //     $user->token = $token->plainTextToken;
+
+    //     return response()->json($user, 200);
+    // }
+
     public function login(Request $request)
     {
-
+        // Xác thực thông tin đăng nhập
         $success = Auth::attempt($request->only('email', 'password'));
 
         if (!$success) {
             return response()->json(['message' => 'Thông tin đăng nhập không đúng!'], 401);
         }
-        // kiểm tra user còn quyền vào tài khoản không ->where('is_active', 1)
+
+        // Kiểm tra user còn quyền vào tài khoản không ->where('is_active', 1)
         $user = User::where('email', $request->email)->where('is_active', 1)->first();
 
+        if (!$user) {
+            return response()->json(['message' => 'Tài khoản không hoạt động hoặc không tồn tại!'], 404);
+        }
+
+        // Xóa tất cả các token hiện tại của người dùng để đảm bảo chỉ có một phiên đăng nhập
+        $user->tokens()->delete();
+
+        // Tạo token mới
         $token = $user->createToken($request->email);
 
+        // Trả về token mới cho người dùng
         $user->token = $token->plainTextToken;
 
         return response()->json($user, 200);
     }
-
     public function refreshToken(Request $request)
     {
         $refreshToken = $request->header('Refresh-Token');
