@@ -253,6 +253,9 @@ class PostController extends Controller
                         }
                     });
                 })
+                ->whereHas('user', function ($query) {
+                    $query->where('is_active', 1);
+                })
                 ->orderBy('updated_at', 'desc');
 
             // Address search
@@ -312,6 +315,7 @@ class PostController extends Controller
                         }
                     });
                 })
+
                 ->orderBy('updated_at', 'desc');
 
             // Address search
@@ -693,6 +697,8 @@ class PostController extends Controller
                         }
                     }
                 });
+            })->whereHas('user', function ($query) {
+                $query->where('is_active', 1);
             })
             ->wherein('classrank',$accessPermissionsArray)
             ->orderBy('updated_at', 'desc');
