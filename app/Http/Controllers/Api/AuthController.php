@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\UserLoggedOut;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+
 
 class AuthController extends Controller
 {
@@ -49,7 +53,19 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Tài khoản không hoạt động hoặc không tồn tại!'], 404);
         }
+            $currentDateTime = Carbon::now();
+      
+            $user->update([
+                'is_login' => $currentDateTime->timestamp,
+            ]);
+                
+           
+          // Kiểm tra nếu user đang có session hoạt động khác
+            event(new UserLoggedOut($user->id));
+        
 
+        // Tạo session mới cho user B và xóa session cũ của user A
+    //    Auth::logoutOtherDevices($request->password);
         // Xóa tất cả các token hiện tại của người dùng để đảm bảo chỉ có một phiên đăng nhập
         $user->tokens()->delete();
 
@@ -60,6 +76,22 @@ class AuthController extends Controller
         $user->token = $token->plainTextToken;
 
         return response()->json($user, 200);
+    }
+    public function updateLoginStatus(Request $request)
+    {
+        $userId = $request->userId;
+        $is_login = $request->is_login;
+
+        $user   =   User::where('id', $userId)->first();
+        if(!$user){
+            return response()->json(['status' => 'error']);
+        }
+        if($user->is_login > $is_login){
+            return response()->json(['status' => 'error']);
+        }
+
+        return response()->json(['success' => true]);
+      
     }
     public function refreshToken(Request $request)
     {

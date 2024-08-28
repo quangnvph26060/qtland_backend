@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Events\UserLoggedOut;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,4 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/test-event', function () {
+    event(new UserLoggedOut(3)); // Thay 1 bằng ID người dùng thực tế
+    return 'Event has been fired!';
 });
