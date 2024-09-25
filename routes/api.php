@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConfigController;
@@ -162,3 +163,7 @@ Route::group(['prefix' => 'comments'], function () {
 
 Route::post('/post-views', [PostViewController::class, 'store']);
 Route::get('/posts/{id}/views', [PostViewController::class, 'getViews']);
+
+Route::get('/cities', [CityController::class, 'getCities']);
+Route::get('/cities/{cityId}/districts', [CityController::class, 'getDistrictsByCityId']);
+Route::get('/districts/{districtId}/wards', [CityController::class, 'getWardsByDistrictId']);

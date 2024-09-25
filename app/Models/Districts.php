@@ -14,4 +14,18 @@ class Districts extends Model
         'name',
         'id',
     ];
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    /**
+     * Quan hệ giữa District và Ward.
+     * Một quận/huyện có nhiều phường/xã.
+     */
+    public function wards()
+    {
+        return $this->hasMany(Wards::class);
+    }
 }
