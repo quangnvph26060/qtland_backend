@@ -70,7 +70,7 @@ class ImageController extends Controller
             $image->delete();
             Storage::delete('public/upload/images/posts/' . $directoryName . '/' . basename($image->image_path));
         }
-
+        $i = 0;
         foreach ($request->file('files') as $file) {
             // Lưu ảnh mới vào thư mục của bài viết
             $storagePath = $directoryPath . '/' . $i . '.' . $file->getClientOriginalExtension();
