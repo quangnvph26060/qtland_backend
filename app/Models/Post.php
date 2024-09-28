@@ -61,6 +61,7 @@ class Post extends Model
         'pay',
         'traphong',
         'note',
+        'setup'
     ];
 
     // public function searchableAs(): string
