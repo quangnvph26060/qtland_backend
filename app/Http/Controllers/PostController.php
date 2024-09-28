@@ -62,7 +62,7 @@ class PostController extends Controller
 
         $post = Post::create(
             [
-                'title' => $request->title,
+                // 'title' => $request->title,
                 'description' => $request->description,
                 'address' => $request->address,
                 'address_detail' => $request->address_detail,
@@ -96,7 +96,8 @@ class PostController extends Controller
                 'priority_status' => $request->priority_status ?? "",
                 'updated_at' => date('Y-m-d H:i:s'),
                 'user_id' => $request->user_id,
-                'traphong' => $request->traphong
+                'traphong' => $request->traphong,
+                'setup' => $request->setup
             ]
         );
 
@@ -1004,7 +1005,7 @@ class PostController extends Controller
         $post = Post::find($id);
         $post->update(
             [
-                'title' => $request->title,
+                // 'title' => $request->title,
                 'description' => $request->description,
                 'address' => $request->address,
                 'address_detail' => $request->address_detail,
@@ -1037,7 +1038,8 @@ class PostController extends Controller
                 'pay' => $request->pay,
                 'priority_status' => $request->priority_status,
                 'updated_at' => date('Y-m-d H:i:s'),
-                'traphong' => $request->traphong
+                'traphong' => $request->traphong,
+                'setup' => $request->setup
             ]
         );
         // if (Redis::exists('post:' . $id)) {
