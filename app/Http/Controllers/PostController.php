@@ -62,7 +62,7 @@ class PostController extends Controller
 
         $post = Post::create(
             [
-                'title' => $request->floors .'-'. $request->address_detail ."". $request->areausable ."/".$request->area ." ". $request->wayin ." ". $request->price/1000000 ."tr",
+                'title' => $request->floors .'-'. $request->address_detail ." ". $request->areausable ."/".$request->area ." ". $request->wayin ." ". $request->price/1000000 ."tr",
                 'description' => $request->description,
                 'address' => $request->address,
                 'address_detail' => $request->address_detail,
@@ -1005,7 +1005,7 @@ class PostController extends Controller
         $post = Post::find($id);
         $post->update(
             [
-                'title' => $request->floors .'-'. $request->address_detail ."". $request->areausable ."/".$request->area ." ". $request->wayin ." ". $request->price/1000000 ."tr",
+                'title' => $request->floors .'-'. $request->address_detail ." ". $request->areausable ."/".$request->area ." ". $request->wayin ." ". $request->price/1000000 ."tr",
                 'description' => $request->description,
                 'address' => $request->address,
                 'address_detail' => $request->address_detail,
