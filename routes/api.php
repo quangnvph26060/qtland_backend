@@ -54,6 +54,7 @@ Route::group(['prefix' => 'auth'], function () {
 // Route for users
 Route::group(['prefix' => 'users'], function () {
     Route::get('', [UserController::class, 'index']);
+    Route::get('/cong-tac-vien', [UserController::class, 'collaborator']);
     Route::get('/user-role/role', [UserController::class, 'userrole']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::get('/{id}/name', [UserController::class, 'getName']);

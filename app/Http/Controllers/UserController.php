@@ -24,7 +24,17 @@ class UserController extends Controller
     {
         // return User::withCount('post')->get();
         $pageSize = $request->input('pageSize', 10);
-        $users = User::withCount('post')->orderBy('updated_at', 'desc')->paginate($pageSize);
+        $users = User::withCount('post')->where('role_id', '!=', 7)->orderBy('updated_at', 'desc')->paginate($pageSize);
+        return response()->json($users);
+    }
+
+    public function collaborator(Request $request)
+    {
+        // return User::withCount('post')->get();
+        $userId = $request->input('user_id');
+        $pageSize = $request->input('pageSize', 10);
+        Log::info($userId);
+        $users = User::where('user_id', $userId)->where('role_id', '7')->orderBy('updated_at', 'desc')->paginate($pageSize);
         return response()->json($users);
     }
 
@@ -35,7 +45,7 @@ class UserController extends Controller
         // ->whereNotIn('role_id', [1, 6])
         // ->get();
         $pageSize = $request->input('pageSize', 10);
-        $users = User::withCount('post')->whereNotIn('role_id', [1, 6])->orderBy('updated_at', 'desc')->paginate($pageSize);
+        $users = User::withCount('post')->whereNotIn('role_id', [1, 6, 7])->orderBy('updated_at', 'desc')->paginate($pageSize);
         return response()->json($users);
     }
 
@@ -76,6 +86,7 @@ class UserController extends Controller
             ]
         );
 
+        Log::info($request['user_id']);
         $user = User::create(
             [
                 'name' => $request['name'],
@@ -90,6 +101,7 @@ class UserController extends Controller
                 'password' =>  Hash::make($request['password']),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
+                'user_id' =>  $request['user_id'],
             ]
         );
         if(!$user){

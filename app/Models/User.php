@@ -27,7 +27,8 @@ class User extends Authenticatable
         'workunit',
         'role_id',
         'is_active',
-        'is_login'
+        'is_login',
+        'user_id'
     ];
 
     // public function searchableAs(): string
