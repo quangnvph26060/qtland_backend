@@ -216,6 +216,12 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
+        $permissions = Permission::where('user_id', $id)->first();
+        $permissions->delete();
+        $user_ctv = User::where('user_id', $id)->get();
+        if($user_ctv){
+            $user_ctv->delete();
+        }
         $user->delete();
         return response()->json(['message' => 'Xóa thành công'], 200);
     }

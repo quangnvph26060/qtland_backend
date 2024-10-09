@@ -25,16 +25,30 @@ class ImageController extends Controller
         if ($request->hasFile('files')) {
             $post_id = $request->post_id;
             $i = 1;
+
             foreach ($request->file('files') as $file) {
+                $timestamp = now()->format('YmdHis');
+                // Tên thư mục và đường dẫn lưu trữ
                 $directoryName = 'post-' . ($post_id);
-                $storagePath = 'public/upload/images/posts/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+                $publicPath = 'public/upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
+                $localPath = 'upload/images/posts/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+
+                // Lưu file vào public storage
+                Storage::disk('local')->put($publicPath, file_get_contents($file));
+
+                // Lưu file vào storage (để sao chép hoặc lưu vào vị trí khác nếu cần)
+                Storage::put($localPath, file_get_contents($file));
+
+                // Đường dẫn URL cho ảnh đã lưu
                 $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
-                Storage::disk('local')->put($storagePath, file_get_contents($file));
+
+                // Tạo bản ghi trong cơ sở dữ liệu
                 PostImage::create([
                     'post_id' => $post_id,
-                    'image_path' => $appUrl ."/" . $storageUrl
+                    'image_path' => $appUrl . '/' . $storageUrl
                 ]);
-                $i = $i + 1;
+
+                $i++;
             }
             return ['success' => 'Upload thành công'];
         } else {
@@ -42,10 +56,12 @@ class ImageController extends Controller
         }
     }
 
+
     function update(Request $request)
     {
         $appUrl = env('APP_URL');
         $post_id = $request->post_id;
+
         // Xóa hết các ảnh trong thư mục của bài viết
         $directoryName = 'post-' . $post_id;
         $directoryPath = 'public/upload/images/posts/' . $directoryName;
@@ -54,6 +70,7 @@ class ImageController extends Controller
 
         $deleted_files = json_decode($request->deleted_files);
 
+        // Xóa ảnh đã chọn
         foreach ($images as $image) {
             $check = false;
             for ($i = 0; $i < count($deleted_files); $i++) {
@@ -70,24 +87,40 @@ class ImageController extends Controller
             $image->delete();
             Storage::delete('public/upload/images/posts/' . $directoryName . '/' . basename($image->image_path));
         }
+
+        // Lưu ảnh mới
         $i = 0;
         foreach ($request->file('files') as $file) {
-            // Lưu ảnh mới vào thư mục của bài viết
-            $storagePath = $directoryPath . '/' . $i . '.' . $file->getClientOriginalExtension();
-            $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
-            Storage::disk('local')->put($storagePath, file_get_contents($file));
+            // Lấy thời gian hiện tại và định dạng thành chuỗi
+            $timestamp = now()->format('YmdHis'); // Định dạng: YYYYMMDDHHMMSS
+            $extension = $file->getClientOriginalExtension();
+
+            // Tên thư mục và đường dẫn lưu trữ
+            $publicPath = 'public/upload/images/posts/' . $directoryName . '/' . $timestamp . '_' . $i . '.' . $extension;
+            $localPath = 'upload/images/posts/' . $directoryName . '/' . $timestamp . '_' . $i . '.' . $extension;
+
+            // Lưu file vào public storage
+            Storage::disk('local')->put($publicPath, file_get_contents($file));
+
+            // Lưu file vào storage (để sao chép hoặc lưu vào vị trí khác nếu cần)
+            Storage::put($localPath, file_get_contents($file));
+
+            // Đường dẫn URL cho ảnh đã lưu
+            $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' . $timestamp . '_' . $i . '.' . $extension;
 
             // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
             PostImage::create([
                 'post_id' => $post_id,
-                'image_path' => $appUrl ."/" . $storageUrl
+                'image_path' => $appUrl . '/' . $storageUrl
             ]);
 
             $i++;
         }
 
+
         return response()->json($post, 200);
     }
+
 
     function uploadCommentImg(Request $request)
     {
