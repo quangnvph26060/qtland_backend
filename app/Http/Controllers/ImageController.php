@@ -31,7 +31,7 @@ class ImageController extends Controller
                 // Tên thư mục và đường dẫn lưu trữ
                 $directoryName = 'post-' . ($post_id);
                 $publicPath = 'public/upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
-                $localPath = 'upload/images/posts/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+                $localPath = 'upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
 
                 // Lưu file vào public storage
                 Storage::disk('local')->put($publicPath, file_get_contents($file));
@@ -40,7 +40,7 @@ class ImageController extends Controller
                 Storage::put($localPath, file_get_contents($file));
 
                 // Đường dẫn URL cho ảnh đã lưu
-                $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' . $i . '.' . $file->getClientOriginalExtension();
+                $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
 
                 // Tạo bản ghi trong cơ sở dữ liệu
                 PostImage::create([
