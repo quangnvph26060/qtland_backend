@@ -671,7 +671,7 @@ class PostController extends Controller
         //     return response()->json(json_decode($cachedPosts), 200);
         // } else {
         $postsQuery = Post::with(['status:id,name', 'postImage'])
-            ->withCount('views')->where('sold_status', 0)
+            ->withCount('views')->where('sold_status', 0)->where('status_id', 4)
             ->when(!$request->filled('address'), function ($query) {
                 $query->where('status_id', 4);
             })
@@ -740,7 +740,7 @@ class PostController extends Controller
         //     return response()->json(json_decode($cachedPosts), 200);
         // } else {
         $postsQuery = Post::with(['status:id,name', 'postImage'])
-            ->withCount('views')->where('sold_status', 0)
+            ->withCount('views')->where('sold_status', 0)->where('status_id', 4)
             ->when(!$request->filled('address'), function ($query) {
                 $query->where('status_id', 4);
             })
