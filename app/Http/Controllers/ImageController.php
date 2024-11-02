@@ -28,24 +28,25 @@ class ImageController extends Controller
 
             foreach ($request->file('files') as $file) {
                 $timestamp = now()->format('YmdHis');
-                // Tên thư mục và đường dẫn lưu trữ
-                $directoryName = 'post-' . ($post_id);
-                $publicPath = 'public/upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
-                $localPath = 'upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
+                $directoryName = 'post-' . $post_id;
+                $fileName = $timestamp . "_" . $i . '.' . $file->getClientOriginalExtension();
 
-                // Lưu file vào public storage
-                Storage::disk('local')->put($publicPath, file_get_contents($file));
+                // Đường dẫn lưu trữ trong Storage
+                $publicPath = 'upload/images/posts/' . $directoryName . '/' . $fileName;
 
-                // Lưu file vào storage (để sao chép hoặc lưu vào vị trí khác nếu cần)
-                Storage::put($localPath, file_get_contents($file));
+                // Tạo thư mục nếu chưa tồn tại
+                Storage::makeDirectory('upload/images/posts/' . $directoryName);
+
+                // Lưu file vào storage (cả local và public storage đều được cấu hình trong 'public' disk)
+                $file->storeAs('upload/images/posts/' . $directoryName, $fileName, 'public');
 
                 // Đường dẫn URL cho ảnh đã lưu
-                $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' .$timestamp."_". $i . '.' . $file->getClientOriginalExtension();
+                $storageUrl = asset('storage/upload/images/posts/' . $directoryName . '/' . $fileName);
 
                 // Tạo bản ghi trong cơ sở dữ liệu
                 PostImage::create([
                     'post_id' => $post_id,
-                    'image_path' => $appUrl . '/' . $storageUrl
+                    'image_path' => $storageUrl
                 ]);
 
                 $i++;
@@ -91,27 +92,26 @@ class ImageController extends Controller
         // Lưu ảnh mới
         $i = 0;
         foreach ($request->file('files') as $file) {
-            // Lấy thời gian hiện tại và định dạng thành chuỗi
-            $timestamp = now()->format('YmdHis'); // Định dạng: YYYYMMDDHHMMSS
-            $extension = $file->getClientOriginalExtension();
+            $timestamp = now()->format('YmdHis');
+            $directoryName = 'post-' . $post_id;
+            $fileName = $timestamp . "_" . $i . '.' . $file->getClientOriginalExtension();
 
-            // Tên thư mục và đường dẫn lưu trữ
-            $publicPath = 'public/upload/images/posts/' . $directoryName . '/' . $timestamp . '_' . $i . '.' . $extension;
-            $localPath = 'upload/images/posts/' . $directoryName . '/' . $timestamp . '_' . $i . '.' . $extension;
+            // Đường dẫn lưu trữ trong Storage
+            $publicPath = 'upload/images/posts/' . $directoryName . '/' . $fileName;
 
-            // Lưu file vào public storage
-            Storage::disk('local')->put($publicPath, file_get_contents($file));
+            // Tạo thư mục nếu chưa tồn tại
+            Storage::makeDirectory('upload/images/posts/' . $directoryName);
 
-            // Lưu file vào storage (để sao chép hoặc lưu vào vị trí khác nếu cần)
-            Storage::put($localPath, file_get_contents($file));
+            // Lưu file vào storage (cả local và public storage đều được cấu hình trong 'public' disk)
+            $file->storeAs('upload/images/posts/' . $directoryName, $fileName, 'public');
 
             // Đường dẫn URL cho ảnh đã lưu
-            $storageUrl = 'storage/upload/images/posts/' . $directoryName . '/' . $timestamp . '_' . $i . '.' . $extension;
+            $storageUrl = asset('storage/upload/images/posts/' . $directoryName . '/' . $fileName);
 
-            // Tạo bản ghi cho ảnh mới trong cơ sở dữ liệu
+            // Tạo bản ghi trong cơ sở dữ liệu
             PostImage::create([
                 'post_id' => $post_id,
-                'image_path' => $appUrl . '/' . $storageUrl
+                'image_path' => $storageUrl
             ]);
 
             $i++;

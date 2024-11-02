@@ -54,14 +54,16 @@ Route::group(['prefix' => 'auth'], function () {
 // Route for users
 Route::group(['prefix' => 'users'], function () {
     Route::get('', [UserController::class, 'index']);
+    Route::get('/approval', [UserController::class, 'approval']);
     Route::get('/cong-tac-vien', [UserController::class, 'collaborator']);
     Route::get('/user-role/role', [UserController::class, 'userrole']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::get('/{id}/name', [UserController::class, 'getName']);
     Route::post('', [UserController::class, 'store']);
-    Route::put('/{id}', [UserController::class, 'update']);
+    Route::post('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
     Route::post('/change-password', [UserController::class, 'changePassWord']);
+    Route::post('/approval/update/{id}', [UserController::class, 'approvalupdate']);
 });
 
 Route::post('/send-email', [EmailController::class, 'sendEmail']);
