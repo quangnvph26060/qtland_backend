@@ -25,7 +25,8 @@ class UserController extends Controller
     {
         // return User::withCount('post')->get();
         $pageSize = $request->input('pageSize', 10);
-        $users = User::withCount('post')->where('role_id', '!=', 7)->where('is_active', '!=', 2)->where('is_active', '!=', 3)->orderBy('updated_at', 'desc')->paginate($pageSize);
+        $users = User::withCount('post')->where('role_id', '!=', 7)->whereNotIn('is_active', [2, 3])->orderBy('updated_at', 'desc')->paginate($pageSize);
+
         return response()->json($users);
     }
 
