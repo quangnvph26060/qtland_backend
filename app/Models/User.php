@@ -28,7 +28,10 @@ class User extends Authenticatable
         'role_id',
         'is_active',
         'is_login',
-        'user_id'
+        'user_id',
+        'gender',
+        'cccd_sau',
+        'cccd_trc'
     ];
 
     // public function searchableAs(): string

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Permission;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -24,8 +25,23 @@ class UserController extends Controller
     {
         // return User::withCount('post')->get();
         $pageSize = $request->input('pageSize', 10);
-        $users = User::withCount('post')->where('role_id', '!=', 7)->orderBy('updated_at', 'desc')->paginate($pageSize);
+        $users = User::withCount('post')->where('role_id', '!=', 7)->where('is_active', '!=', 2)->where('is_active', '!=', 3)->orderBy('updated_at', 'desc')->paginate($pageSize);
         return response()->json($users);
+    }
+
+    public function approval(Request $request)
+    {
+        // return User::withCount('post')->get();
+        $pageSize = $request->input('pageSize', 10);
+        $users = User::withCount('post')->where('role_id', '!=', 7)->where('is_active', '=', 2)->orderBy('updated_at', 'desc')->paginate($pageSize);
+        return response()->json($users);
+    }
+
+    public function approvalupdate(Request $request, $id){
+        $user = User::find($id);
+        $user->is_active = $request->is_active;
+        $user->save();
+        return response()->json(['message' => 'Success'], 200);
     }
 
     public function collaborator(Request $request)
@@ -34,7 +50,8 @@ class UserController extends Controller
         $userId = $request->input('user_id');
         $pageSize = $request->input('pageSize', 10);
         Log::info($userId);
-        $users = User::where('user_id', $userId)->where('role_id', '7')->orderBy('updated_at', 'desc')->paginate($pageSize);
+        $users = User::where('user_id', $userId)->whereIn('role_id', [7, 8])->orderBy('updated_at', 'desc')->paginate($pageSize);
+
         return response()->json($users);
     }
 
@@ -68,7 +85,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-
+        Log::info($request->all());
         $validatedData = $request->validate(
             [
                 'name' => 'required',
@@ -86,7 +103,14 @@ class UserController extends Controller
             ]
         );
 
-        Log::info($request['user_id']);
+
+        $cccd_trc_path = $request->file('cccd_trc')->store('images/cccd', 'public');
+        $cccd_sau_path = $request->file('cccd_sau')->store('images/cccd', 'public');
+
+
+        $timestamp = Carbon::now()->format('YmdHis');
+        $cccd_trc_url = url('storage/' . $cccd_trc_path) . '?t=' . $timestamp;
+        $cccd_sau_url = url('storage/' . $cccd_sau_path) . '?t=' . $timestamp;
         $user = User::create(
             [
                 'name' => $request['name'],
@@ -95,6 +119,7 @@ class UserController extends Controller
                 'birthday' => $request['birthday'],
                 'phone' => $request['phone'],
                 'address' => $request['address'],
+                'gender' => $request['gender'],
                 'workunit' => $request['workunit'],
                 'role_id' => ($request['role_id'] == null ? 3 : (int) $request['role_id']),
                 'is_active' => ($request['is_active'] == null ? 1 : (int) $request['is_active']),
@@ -102,20 +127,22 @@ class UserController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
                 'user_id' =>  $request['user_id'],
+                'cccd_trc' => $cccd_trc_url, // Lưu đường dẫn URL hoàn chỉnh của ảnh trước
+                'cccd_sau' => $cccd_sau_url, // Lưu đường dẫn URL hoàn chỉnh của ảnh sau
             ]
         );
-        if(!$user){
+        if (!$user) {
             return response()->json(['message' => 'Thêm mới thành công'], 201);
         }
         Permission::create(
             [
                 'user_id' => $user->id,
                 'role_id' => $user->role_id,
-                'access_permission_1' =>$request['access_permission_1'],
-                'access_permission_2' =>$request['access_permission_2'],
-                'access_permission_3' =>$request['access_permission_3'],
-                'access_permission_4' =>$request['access_permission_4'],
-                'access_permission_5' =>$request['access_permission_5'],
+                'access_permission_1' => $request['access_permission_1'],
+                'access_permission_2' => $request['access_permission_2'],
+                'access_permission_3' => $request['access_permission_3'],
+                'access_permission_4' => $request['access_permission_4'],
+                'access_permission_5' => $request['access_permission_5'],
             ]
         );
         return response()->json(['message' => 'Thêm mới thành công'], 201);
@@ -130,6 +157,7 @@ class UserController extends Controller
     public function show($id)
     {
         //
+        Log::info(User::findOrFail($id));
         return User::findOrFail($id);
     }
 
@@ -158,27 +186,30 @@ class UserController extends Controller
      * @return message
      * CreatedBy: youngbachhh (31/03/2024)
      */
-    public function update(Request $request, $id)
+    public function update($id, Request $request)
     {
+        Log::info($id);
+        Log::info($request->all());
 
-        $validatedData = $request->validate(
-            [
-                'name' => 'required',
-                'password' => 'nullable'
-
-            ],
-            [
-                'name.required' => 'Không được bỏ trống tên',
-
-            ]
-        );
+        $validatedData = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'password' => 'nullable'
+        ], [
+            'name.required' => 'Không được bỏ trống tên',
+            'email.required' => 'Không được bỏ trống email',
+            'email.email' => 'Email không đúng định dạng'
+        ]);
 
         $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+        }
 
-        $result =    $user->update([
+        $password = $request->input('password');
+        $userData = [
             "name" => $request->name,
             "email" => $request->email,
-            "password" => (empty($request->password) ? $user->password : Hash::make($request->password)),
             "role_id" => $request->role_id,
             "is_active" => $request->is_active,
             'cccd' => $request->cccd,
@@ -186,14 +217,37 @@ class UserController extends Controller
             'address' => $request->address,
             'workunit' => $request->workunit,
             'birthday' => $request->birthday,
-            "updated_at" => date('Y-m-d H:i:s'),
-        ]);
-        if(!$result){
-            return response()->json(['message' => 'Cập nhật user không thành công '],401);
+            'gender' => $request->gender,
+            "updated_at" => now(),
+        ];
+
+        if (!empty($password)) {
+            $userData['password'] = Hash::make($password);
         }
+
+        $timestamp = now()->format('YmdHis');
+        if ($request->hasFile('cccd_trc')) {
+            $cccd_trc_path = $request->file('cccd_trc')->store('images/cccd', 'public');
+            $cccd_trc_url = url('storage/' . $cccd_trc_path) . '?t=' . $timestamp;
+            $userData['cccd_trc'] = $cccd_trc_url;
+            Log::info($cccd_trc_url);
+        }
+
+        if ($request->hasFile('cccd_sau')) {
+            $cccd_sau_path = $request->file('cccd_sau')->store('images/cccd', 'public');
+            $cccd_sau_url = url('storage/' . $cccd_sau_path) . '?t=' . $timestamp;
+            $userData['cccd_sau'] = $cccd_sau_url;
+            Log::info($cccd_sau_url);
+        }
+
+        $result = $user->update($userData);
+        if (!$result) {
+            return response()->json(['message' => 'Cập nhật user không thành công '], 401);
+        }
+
         $permission = Permission::where('user_id', $id)->first();
-        $permission->update(
-            [
+        if ($permission) {
+            $permission->update([
                 'user_id' => $user->id,
                 'role_id' => $user->role_id,
                 'access_permission_1' => $request->access_permission_1,
@@ -201,10 +255,13 @@ class UserController extends Controller
                 'access_permission_3' => $request->access_permission_3,
                 'access_permission_4' => $request->access_permission_4,
                 'access_permission_5' => $request->access_permission_5,
-            ]
-        );
+            ]);
+        }
+
         return response()->json(['message' => 'Cập nhật thành công'], 200);
     }
+
+
 
 
     /**
@@ -216,15 +273,28 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
+        Log::info($user);
+
+        // Xóa bản ghi trong bảng Permission
         $permissions = Permission::where('user_id', $id)->first();
-        $permissions->delete();
-        $user_ctv = User::where('user_id', $id)->get();
-        if($user_ctv){
-            $user_ctv->delete();
+        if ($permissions) {
+            $permissions->delete();
         }
-        $user->delete();
+
+        // Xóa các bản ghi liên quan đến user trong bảng User (các cộng tác viên)
+        $user_ctv = User::where('user_id', $id)->get();
+        foreach ($user_ctv as $ctv) {
+            $ctv->delete();
+        }
+
+        // Xóa bản ghi người dùng chính
+        if ($user) {
+            $user->delete();
+        }
+
         return response()->json(['message' => 'Xóa thành công'], 200);
     }
+
 
     public function updateAvatar(Request $request)
     {
@@ -241,7 +311,8 @@ class UserController extends Controller
         $user = User::find($request->input('id'));
         return response()->json($user, 200);
     }
-    public function changePassWord(Request $request){
+    public function changePassWord(Request $request)
+    {
 
         //   $request->validate([
         //     'current_password' => 'required',
