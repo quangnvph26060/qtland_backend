@@ -88,12 +88,12 @@ class UserController extends Controller
     public function store(Request $request)
     {
         Log::info($request->all());
+
         $validatedData = $request->validate(
             [
                 'name' => 'required',
                 'email' => 'required|email|unique:users',
                 'password' => 'required'
-
             ],
             [
                 'name.required' => 'Không được bỏ trống tên',
@@ -101,27 +101,50 @@ class UserController extends Controller
                 'email.email' => 'Email không đúng định dạng',
                 'email.unique' => 'Email đã tồn tại',
                 'password.required' => 'Không được bỏ trống mật khẩu'
-
             ]
         );
 
-
         $timestamp = now()->format('YmdHis');
+        $cccd_trc_path = null; // Khởi tạo biến đường dẫn cho cccd_trc
+        $cccd_sau_path = null; // Khởi tạo biến đường dẫn cho cccd_sau
+
+        // Xử lý file cccd_trc
         if ($request->hasFile('cccd_trc')) {
             $file = $request->file('cccd_trc');
-            $cccd_trc_path = $this->storeImage($file, $timestamp);
 
+            // Kiểm tra kích thước file
+            if ($file->getSize() > 2 * 1024 * 1024) { // 2MB
+                // Tạo một file ZIP
+                $zip = new \ZipArchive();
+                $zipFileName = 'cccd_trc_' . time() . '.zip'; // Tên file ZIP
 
-            Log::info($cccd_trc_path);
+                // Đường dẫn tới thư mục storage
+                $zipFilePath = storage_path('app/public/uploads/' . $zipFileName);
+
+                if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
+                    // Thêm file vào ZIP
+                    $zip->addFile($file->getRealPath(), $file->getClientOriginalName());
+                    $zip->close();
+
+                    // Lưu đường dẫn file ZIP vào database
+                    $cccd_trc_path = 'uploads/' . $zipFileName; // Đường dẫn lưu vào database
+                }
+            } else {
+                // Di chuyển file không cần nén vào storage
+                $cccd_trc_path = $file->storeAs('uploads', 'cccd_trc_' . time() . '.' . $file->getClientOriginalExtension(), 'public');
+            }
         }
 
+        // Xử lý file cccd_sau
         if ($request->hasFile('cccd_sau')) {
             $file = $request->file('cccd_sau');
+
+            // Lưu ảnh và nhận đường dẫn
             $cccd_sau_path = $this->storeImage($file, $timestamp);
-
-
             Log::info($cccd_sau_path);
         }
+
+        // Tạo người dùng mới
         $user = User::create(
             [
                 'name' => $request['name'],
@@ -132,19 +155,23 @@ class UserController extends Controller
                 'address' => $request['address'],
                 'gender' => $request['gender'],
                 'workunit' => $request['workunit'],
-                'role_id' => ($request['role_id'] == null ? 3 : (int) $request['role_id']),
-                'is_active' => ($request['is_active'] == null ? 1 : (int) $request['is_active']),
-                'password' =>  Hash::make($request['password']),
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-                'user_id' =>  $request['user_id'],
+                'role_id' => ($request['role_id'] == null ? 3 : (int)$request['role_id']),
+                'is_active' => ($request['is_active'] == null ? 1 : (int)$request['is_active']),
+                'password' => Hash::make($request['password']),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'user_id' => $request['user_id'],
                 'cccd_trc' => $cccd_trc_path, // Lưu đường dẫn URL hoàn chỉnh của ảnh trước
                 'cccd_sau' => $cccd_sau_path, // Lưu đường dẫn URL hoàn chỉnh của ảnh sau
             ]
         );
+
+        // Nếu không tạo được người dùng, trả về thông báo
         if (!$user) {
-            return response()->json(['message' => 'Thêm mới thành công'], 201);
+            return response()->json(['message' => 'Thêm mới thất bại'], 400);
         }
+
+        // Tạo permission cho người dùng
         Permission::create(
             [
                 'user_id' => $user->id,
@@ -156,6 +183,7 @@ class UserController extends Controller
                 'access_permission_5' => $request['access_permission_5'],
             ]
         );
+
         return response()->json(['message' => 'Thêm mới thành công'], 201);
     }
 
