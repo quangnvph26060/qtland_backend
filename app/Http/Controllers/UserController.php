@@ -38,7 +38,8 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function approvalupdate(Request $request, $id){
+    public function approvalupdate(Request $request, $id)
+    {
         $user = User::find($id);
         $user->is_active = $request->is_active;
         $user->save();
@@ -105,13 +106,20 @@ class UserController extends Controller
         );
 
 
-        $cccd_trc_path = $request->file('cccd_trc')->store('images/cccd', 'public');
-        $cccd_sau_path = $request->file('cccd_sau')->store('images/cccd', 'public');
+        $timestamp = now()->format('YmdHis');
+        if ($request->hasFile('cccd_trc')) {
+            $file = $request->file('cccd_trc');
+            $cccd_trc_path = $this->storeImage($file, $timestamp);
 
+            Log::info($cccd_trc_path);
+        }
 
-        $timestamp = Carbon::now()->format('YmdHis');
-        $cccd_trc_url = url('storage/' . $cccd_trc_path) . '?t=' . $timestamp;
-        $cccd_sau_url = url('storage/' . $cccd_sau_path) . '?t=' . $timestamp;
+        if ($request->hasFile('cccd_sau')) {
+            $file = $request->file('cccd_sau');
+            $cccd_sau_path = $this->storeImage($file, $timestamp);
+
+            Log::info($cccd_sau_path);
+        }
         $user = User::create(
             [
                 'name' => $request['name'],
@@ -128,8 +136,8 @@ class UserController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
                 'user_id' =>  $request['user_id'],
-                'cccd_trc' => $cccd_trc_url, // Lưu đường dẫn URL hoàn chỉnh của ảnh trước
-                'cccd_sau' => $cccd_sau_url, // Lưu đường dẫn URL hoàn chỉnh của ảnh sau
+                'cccd_trc' => $cccd_trc_path, // Lưu đường dẫn URL hoàn chỉnh của ảnh trước
+                'cccd_sau' => $cccd_sau_path, // Lưu đường dẫn URL hoàn chỉnh của ảnh sau
             ]
         );
         if (!$user) {
