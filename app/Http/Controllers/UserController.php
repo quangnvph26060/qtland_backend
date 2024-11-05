@@ -115,6 +115,7 @@ class UserController extends Controller
             // Kiểm tra kích thước file
             if ($file->getSize() > 2 * 1024 * 1024) { // 2MB
                 // Tạo một file ZIP
+                Log::info("ảm lớn");
                 $zip = new \ZipArchive();
                 $zipFileName = 'cccd_trc_' . time() . '.zip'; // Tên file ZIP
 
