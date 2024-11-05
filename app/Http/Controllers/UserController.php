@@ -228,17 +228,17 @@ class UserController extends Controller
 
         $timestamp = now()->format('YmdHis');
         if ($request->hasFile('cccd_trc')) {
-            $cccd_trc_path = $request->file('cccd_trc')->store('images/cccd', 'public');
-            $cccd_trc_url = url('storage/' . $cccd_trc_path) . '?t=' . $timestamp;
-            $userData['cccd_trc'] = $cccd_trc_url;
-            Log::info($cccd_trc_url);
+            $file = $request->file('cccd_trc');
+            $cccd_trc_path = $this->storeImage($file, $timestamp);
+            $userData['cccd_trc'] = $cccd_trc_path;
+            Log::info($cccd_trc_path);
         }
 
         if ($request->hasFile('cccd_sau')) {
-            $cccd_sau_path = $request->file('cccd_sau')->store('images/cccd', 'public');
-            $cccd_sau_url = url('storage/' . $cccd_sau_path) . '?t=' . $timestamp;
-            $userData['cccd_sau'] = $cccd_sau_url;
-            Log::info($cccd_sau_url);
+            $file = $request->file('cccd_sau');
+            $cccd_sau_path = $this->storeImage($file, $timestamp);
+            $userData['cccd_sau'] = $cccd_sau_path;
+            Log::info($cccd_sau_path);
         }
 
         $result = $user->update($userData);
@@ -262,7 +262,27 @@ class UserController extends Controller
         return response()->json(['message' => 'Cập nhật thành công'], 200);
     }
 
+    private function storeImage($file, $timestamp)
+    {
+        $mimeType = $file->getMimeType();
+        $isOctetStream = $mimeType == 'application/octet-stream';
 
+        // Nếu là 'application/octet-stream' hoặc HEIC, chuyển sang JPEG
+        if ($isOctetStream || strpos($mimeType, 'heic') !== false) {
+            $image = imagecreatefromstring(file_get_contents($file->getRealPath()));
+            $path = 'images/cccd/' . uniqid() . '.jpg';
+            $fullPath = public_path('storage/' . $path);
+
+            imagejpeg($image, $fullPath, 85); // Chất lượng 85 cho nén ảnh JPEG
+            imagedestroy($image); // Dọn dẹp bộ nhớ
+
+            return url('storage/' . $path) . '?t=' . $timestamp;
+        } else {
+            // Lưu ảnh nếu MIME type hợp lệ
+            $path = $file->store('images/cccd', 'public');
+            return url('storage/' . $path) . '?t=' . $timestamp;
+        }
+    }
 
 
     /**
