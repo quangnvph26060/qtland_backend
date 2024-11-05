@@ -111,12 +111,14 @@ class UserController extends Controller
             $file = $request->file('cccd_trc');
             $cccd_trc_path = $this->storeImage($file, $timestamp);
 
+
             Log::info($cccd_trc_path);
         }
 
         if ($request->hasFile('cccd_sau')) {
             $file = $request->file('cccd_sau');
             $cccd_sau_path = $this->storeImage($file, $timestamp);
+
 
             Log::info($cccd_sau_path);
         }
