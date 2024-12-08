@@ -896,7 +896,7 @@ class PostController extends Controller
             $minArea = $request->input('min_area', $defaultMinArea);
             $maxArea = $request->input('max_area', $defaultMaxArea);
             if ($minArea != $defaultMinArea || $maxArea != $defaultMaxArea) {
-                $query->whereBetween('area', [$minArea, $maxArea]);
+                $query->whereBetween('areausable', [$minArea, $maxArea]);
             }
         }
         // Front range filter
