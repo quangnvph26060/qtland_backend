@@ -109,12 +109,12 @@ class UserController extends Controller
         $cccd_sau_path = null; // Khởi tạo biến đường dẫn cho cccd_sau
 
         // Xử lý file cccd_trc
-        if ($request->hasFile('cccd_sau')) {
-            $file = $request->file('cccd_sau');
+        if ($request->hasFile('cccd_trc')) {
+            $file = $request->file('cccd_trc');
 
             // Lưu ảnh và nhận đường dẫn
-            $cccd_sau_path = $this->storeImage($file, $timestamp);
-            Log::info($cccd_sau_path);
+            $cccd_trc_path = $this->storeImage($file, $timestamp);
+            Log::info($cccd_trc_path);
         }
 
         // Xử lý file cccd_sau
