@@ -109,31 +109,12 @@ class UserController extends Controller
         $cccd_sau_path = null; // Khởi tạo biến đường dẫn cho cccd_sau
 
         // Xử lý file cccd_trc
-        if ($request->hasFile('cccd_trc')) {
-            $file = $request->file('cccd_trc');
+        if ($request->hasFile('cccd_sau')) {
+            $file = $request->file('cccd_sau');
 
-            // Kiểm tra kích thước file
-            if ($file->getSize() > 2 * 1024 * 1024) { // 2MB
-                // Tạo một file ZIP
-                Log::info("ảm lớn");
-                $zip = new \ZipArchive();
-                $zipFileName = 'cccd_trc_' . time() . '.zip'; // Tên file ZIP
-
-                // Đường dẫn tới thư mục storage
-                $zipFilePath = storage_path('app/public/uploads/' . $zipFileName);
-
-                if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
-                    // Thêm file vào ZIP
-                    $zip->addFile($file->getRealPath(), $file->getClientOriginalName());
-                    $zip->close();
-
-                    // Lưu đường dẫn file ZIP vào database
-                    $cccd_trc_path = 'uploads/' . $zipFileName; // Đường dẫn lưu vào database
-                }
-            } else {
-                // Di chuyển file không cần nén vào storage
-                $cccd_trc_path = $file->storeAs('uploads', 'cccd_trc_' . time() . '.' . $file->getClientOriginalExtension(), 'public');
-            }
+            // Lưu ảnh và nhận đường dẫn
+            $cccd_sau_path = $this->storeImage($file, $timestamp);
+            Log::info($cccd_sau_path);
         }
 
         // Xử lý file cccd_sau
@@ -261,7 +242,7 @@ class UserController extends Controller
             "updated_at" => now(),
         ];
 
-        if (!empty($password)) {
+        if ($password != 'undefined') {
             $userData['password'] = Hash::make($password);
         }
 
@@ -378,8 +359,6 @@ class UserController extends Controller
         //     'current_password' => 'required',
         //     'new_password' => 'required|min:8|confirmed',
         // ]);
-
-
         $user = User::find($request->id);
         Log::info($user);
         if (!Hash::check($request->current_password, $user->password)) {
