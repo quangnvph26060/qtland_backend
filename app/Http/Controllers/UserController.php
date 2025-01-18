@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -23,12 +24,62 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // return User::withCount('post')->get();
+        // Lấy tham số từ request
+        Log::info($request->all());
+        $page = $request->input('page', 1);
         $pageSize = $request->input('pageSize', 10);
-        $users = User::withCount('post')->where('role_id', '!=', 7)->whereNotIn('is_active', [2, 3])->orderBy('updated_at', 'desc')->paginate($pageSize);
+        $priority = $request->input('priority_status', 'all');
+        $searchConditions = $request->input('searchConditions');
+        $searchedColumn = $request->input('searchedColumn');
 
-        return response()->json($users);
+
+
+        // Generate a unique cache key based on request parameters
+        $cacheKey = 'users:' . md5(serialize($request->all()));
+
+        // Kiểm tra cache trước
+        $cachedUsers = Redis::get($cacheKey);
+        if ($cachedUsers) {
+            return response()->json(json_decode($cachedUsers), 200);
+        }
+
+        // Khởi tạo truy vấn
+        $query = User::withCount('post')
+            ->where('role_id', '!=', 7)
+            ->whereNotIn('is_active', [2, 3]);
+
+        // Xử lý điều kiện tìm kiếm
+        if (!empty($searchConditions)) {
+            $query->where(function ($q) use ($searchedColumn, $searchConditions) {
+
+                    if ($searchedColumn === 'name') {
+                        $q->orWhere('name', 'LIKE', '%' . $searchConditions . '%');
+                    } elseif (in_array($searchedColumn, ['email', 'phone'])) {
+                        $q->orWhere($searchedColumn, 'LIKE', '%' . $searchConditions . '%');
+                    }
+            });
+        }
+
+        // Áp dụng các bộ lọc (ví dụ: lọc theo trạng thái ưu tiên, nếu có)
+        if ($priority !== 'all') {
+            $query->where('priority_status', $priority);
+        }
+
+        // Sắp xếp theo cột và thứ tự (nếu có)
+        $sortBy = $request->input('sortBy', 'updated_at');
+        $sortOrder = $request->input('sortOrder', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Phân trang
+        $users = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        // Cache kết quả cho 10 phút
+        Redis::setex($cacheKey, 600, $users->toJson());
+
+        return response()->json($users, 200);
     }
+
+
 
     public function approval(Request $request)
     {
